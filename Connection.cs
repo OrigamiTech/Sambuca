@@ -113,6 +113,7 @@ namespace Sambuca
                         OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
                         break;
                     default:
+                        //connection.Close();
                         break;
                 }
             }

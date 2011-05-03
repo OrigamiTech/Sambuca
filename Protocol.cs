@@ -12,68 +12,79 @@ namespace Sambuca
         {
             short s = 0;
             for(int i = 0; i < sizeof(short); i++)
-                s |= (short)((b[i]) << ((sizeof(short) - i - 1) * 8));
+            {
+                s <<= 8;
+                s |= b[i];
+            }
             return s;
         }
         public static short ReadShort(Stream stream)
         {
-            short s = 0;
+            byte[] b = new byte[sizeof(short)];
             for(int i = 0; i < sizeof(short); i++)
-                s |= (short)(((byte)stream.ReadByte()) << ((sizeof(short) - i - 1) * 8));
-            return s;
+                b[i] = (byte)stream.ReadByte();
+            return ReadShort(b);
         }
         public static int ReadInt(byte[] b)
         {
             int s = 0;
             for(int i = 0; i < sizeof(int); i++)
-                s |= (int)((b[i]) << ((sizeof(int) - i - 1) * 8));
+            {
+                s <<= 8;
+                s |= b[i];
+            }
             return s;
         }
         public static int ReadInt(Stream stream)
         {
-            int s = 0;
+            byte[] b = new byte[sizeof(int)];
             for(int i = 0; i < sizeof(int); i++)
-                s |= (int)(((byte)stream.ReadByte()) << ((sizeof(int) - i - 1) * 8));
-            return s;
+                b[i] = (byte)stream.ReadByte();
+            return ReadInt(b);
         }
         public static long ReadLong(byte[] b)
         {
             long s = 0;
             for(int i = 0; i < sizeof(long); i++)
-                s |= (long)((b[i]) << ((sizeof(long) - i - 1) * 8));
+            {
+                s <<= 8;
+                s |= b[i];
+            }
             return s;
         }
         public static long ReadLong(Stream stream)
         {
-            long s = 0;
+            byte[] b = new byte[sizeof(long)];
             for(int i = 0; i < sizeof(long); i++)
-                s |= (long)(((byte)stream.ReadByte()) << (int)((sizeof(long) - i - 1) * 8));
-            return s;
+                b[i] = (byte)stream.ReadByte();
+            return ReadLong(b);
         }
         public static double ReadDouble(byte[] b)
         {
-            byte[] b2 = new byte[b.Length];
+            /*byte[] b2 = new byte[b.Length];
             for(int i = 0; i < b.Length; i++)
                 b2[i] = b[b.Length - i - 1];
-            return BitConverter.ToDouble(b2, 0);
+            return BitConverter.ToDouble(b2, 0);*/
+            return BitConverter.Int64BitsToDouble(ReadLong(b));
         }
         public static double ReadDouble(Stream stream)
         {
-            byte[] b = new byte[sizeof(double)];
+            /*byte[] b = new byte[sizeof(double)];
             for(int i = 0; i < sizeof(double); i++)
                 b[b.Length - i - 1] = (byte)stream.ReadByte();
-            return BitConverter.ToDouble(b, 0);
+            return BitConverter.ToDouble(b, 0);*/
+            return BitConverter.Int64BitsToDouble(ReadLong(stream));        // no idea if this shit works
         }
         public static float ReadFloat(byte[] b)
         {
-            return BitConverter.ToSingle(b, 0);
+            return BitConverter.ToSingle(b, 0);        // no idea if this shit works either
         }
         public static float ReadFloat(Stream stream)
         {
             byte[] b = new byte[sizeof(float)];
             for(int i = 0; i < sizeof(float); i++)
                 b[i] = (byte)stream.ReadByte();
-            return BitConverter.ToSingle(b, 0);
+            return ReadFloat(b);
         }
         public static bool ReadBool(byte[] b)
         {
