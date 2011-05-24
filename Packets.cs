@@ -59,7 +59,7 @@ namespace Sambuca
             CloseWindow = 0x65,
             WindowClick = 0x66,
             SetSlot = 0x67,
-            WindowItems = 0x68,
+            WindowItems = 0x68,             //
             UpdateProgressBar = 0x69,
             Transaction = 0x6A,
             UpdateSign = 0x82,
@@ -100,6 +100,8 @@ namespace Sambuca
                     return PreChunk.Deserialize(stream);                //0x32
                 case PacketId.NewInvalidState:
                     return NewInvalidState.Deserialize(stream);         //0x46
+                case PacketId.WindowItems:
+                    return WindowItems.Deserialize(stream);             //0x68
                 case PacketId.DisconnectKick:
                     return DisconnectKick.Deserialize(stream);          //0xFF
                 default:
@@ -307,6 +309,28 @@ namespace Sambuca
         public class ChatMessage : Packet //0x03
         {
             private const PacketId PACKET_ID = PacketId.ChatMessage;
+
+            public static class Colors
+            {
+                private const string COLOR_KEYCHAR = "§";
+                public const string
+                    Black = COLOR_KEYCHAR + "0",
+                    DarkBlue = COLOR_KEYCHAR + "1",
+                    DarkGreen = COLOR_KEYCHAR + "2",
+                    DarkTeal = COLOR_KEYCHAR + "3",
+                    DarkRed = COLOR_KEYCHAR + "4",
+                    Purple = COLOR_KEYCHAR + "5",
+                    Gold = COLOR_KEYCHAR + "6",
+                    Gray = COLOR_KEYCHAR + "7",
+                    DarkGray = COLOR_KEYCHAR + "8",
+                    Blue = COLOR_KEYCHAR + "9",
+                    BrightGreen = COLOR_KEYCHAR + "a",
+                    Teal = COLOR_KEYCHAR + "b",
+                    Red = COLOR_KEYCHAR + "c",
+                    Pink = COLOR_KEYCHAR + "d",
+                    Yellow = COLOR_KEYCHAR + "e",
+                    White = COLOR_KEYCHAR + "f";
+            }
 
             private string _Message;
             public string Message { get { return _Message; } set { _Message = value; } }
@@ -759,8 +783,8 @@ namespace Sambuca
                 Console.WriteLine("  X: " + _X);
                 Console.WriteLine("  Y: " + _Y);
                 Console.WriteLine("  Z: " + _Z);
-                Console.WriteLine("  yaw: " + _Yaw);
-                Console.WriteLine("  pitch: " + _Pitch);
+                Console.WriteLine("  Yaw: " + _Yaw);
+                Console.WriteLine("  Pitch: " + _Pitch);
                 Console.Write("  Metadata: ");
                 for(int i = 0; i < _Metadata.Length; i++)
                     Console.Write(_Metadata[i].ToString("X2"));
@@ -954,6 +978,68 @@ namespace Sambuca
                 Console.WriteLine(_Reason == 0 ? " - Invalid Bed" : (_Reason == 1 ? " - Begin raining" : (_Reason == 2 ? " - End raining" : "")));
             }
         }
+
+        public class WindowItems : Packet //0x68
+        {
+            private const PacketId PACKET_ID = PacketId.WindowItems;
+
+            private byte _WindowId;
+            private short _Count;
+            private byte[] _Payload;
+            public byte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public short Count { get { return _Count; } set { _Count = value; } }
+            public byte[] Payload { get { return _Payload; } set { _Payload = value; } }
+            public WindowItems(byte windowid, short count, byte[] payload)
+            {
+                this._WindowId = windowid;
+                this._Count = count;
+                this._Payload = payload;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.WriteByte(_WindowId);
+                        ms.Write(Protocol.WriteShort(_Count), 0, sizeof(short));
+                        ms.Write(_Payload, 0, _Payload.Length);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static WindowItems Deserialize(Stream stream)
+            {
+                byte windowid = (byte)stream.ReadByte();
+                short count = Protocol.ReadShort(stream);
+                MemoryStream payload = new MemoryStream();
+                for(int i = 0; i < count; i++)
+                {
+                    short item_id = Protocol.ReadShort(stream);
+                    payload.Write(Protocol.WriteShort(item_id), 0, sizeof(short));
+                    if(item_id != -1)
+                    {
+                        byte item_count = (byte)stream.ReadByte();
+                        short item_uses = Protocol.ReadShort(stream);
+                        payload.WriteByte(item_count);
+                        payload.Write(Protocol.WriteShort(item_uses), 0, sizeof(short));
+                    }
+                }
+                return new WindowItems(windowid, count, payload.GetBuffer());
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  WindowId: " + _WindowId);
+                Console.WriteLine("  Count: " + _Count);
+                Console.Write("  Payload: ");
+                for(int i = 0; i < _Payload.Length; i++)
+                    Console.Write(_Payload[i].ToString("X2"));
+                Console.WriteLine();
+            }
+        }
+
         public class DisconnectKick : Packet //0xFF
         {
             private const PacketId PACKET_ID = PacketId.DisconnectKick;

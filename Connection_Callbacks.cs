@@ -21,6 +21,7 @@ namespace Sambuca
         public event EH_Packet_EntityVelocity EntityVelocity;
         public event EH_Packet_PreChunk PreChunk;
         public event EH_Packet_NewInvalidState NewInvalidState;
+        public event EH_Packet_WindowItems WindowItems;
         public event EH_Packet_DisconnectKick DisconnectKick;
         public delegate void EH_Packet_KeepAlive(object sender, Packets.KeepAlive e);
         public delegate void EH_Packet_LoginRequest(object sender, Packets.LoginRequestIncoming e);
@@ -36,6 +37,7 @@ namespace Sambuca
         public delegate void EH_Packet_EntityVelocity(object sender, Packets.EntityVelocity e);
         public delegate void EH_Packet_PreChunk(object sender, Packets.PreChunk e);
         public delegate void EH_Packet_NewInvalidState(object sender, Packets.NewInvalidState e);
+        public delegate void EH_Packet_WindowItems(object sender, Packets.WindowItems e);
         public delegate void EH_Packet_DisconnectKick(object sender, Packets.DisconnectKick e);
         protected virtual void OnPacket_KeepAlive(Packets.KeepAlive e) { if(KeepAlive != null)KeepAlive(this, e); }
         protected virtual void OnPacket_LoginRequest(Packets.LoginRequestIncoming e) { if(LoginRequest != null)LoginRequest(this, e); }
@@ -51,6 +53,7 @@ namespace Sambuca
         protected virtual void OnPacket_EntityVelocity(Packets.EntityVelocity e) { if(EntityVelocity != null)EntityVelocity(this, e); }
         protected virtual void OnPacket_PreChunk(Packets.PreChunk e) { if(PreChunk != null)PreChunk(this, e); }
         protected virtual void OnPacket_NewInvalidState(Packets.NewInvalidState e) { if(NewInvalidState != null)NewInvalidState(this, e); }
+        protected virtual void OnPacket_WindowItems(Packets.WindowItems e) { if(WindowItems != null)WindowItems(this, e); }
         protected virtual void OnPacket_DisconnectKick(Packets.DisconnectKick e) { if(DisconnectKick != null)DisconnectKick(this, e); }
     }
 }

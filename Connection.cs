@@ -118,6 +118,9 @@ namespace Sambuca
                     case Packets.PacketId.NewInvalidState:
                         OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
                         break;
+                    case Packets.PacketId.WindowItems:
+                        OnPacket_WindowItems((Packets.WindowItems)packet);
+                        break;
                     case Packets.PacketId.DisconnectKick:
                         OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
                         break;
