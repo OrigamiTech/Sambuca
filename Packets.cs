@@ -30,8 +30,8 @@ namespace Sambuca
             UseBed = 0x11,
             Animation = 0x12,
             EntityAction = 0x13,
-            NamedEntitySpawn = 0x14,
-            PickupSpawn = 0x15,             // DO THIS NEXT
+            NamedEntitySpawn = 0x14,        // DO THIS NEXT
+            PickupSpawn = 0x15,             //
             CollectItem = 0x16,
             AddObjectVehicle = 0x17,        //
             MobSpawn = 0x18,                //
@@ -53,7 +53,7 @@ namespace Sambuca
             BlockChange = 0x35,
             PlayNoteBlock = 0x36,
             Explosion = 0x3C,
-            NewInvalidState = 0x46,
+            NewInvalidState = 0x46,         //
             Weather = 0x47,
             OpenWindow = 0x64,
             CloseWindow = 0x65,
@@ -86,6 +86,8 @@ namespace Sambuca
                     return SpawnPosition.Deserialize(stream);           //0x06
                 case PacketId.PlayerPositionAndLook:
                     return PlayerPositionAndLookIncoming.Deserialize(stream);   //0x0D
+                case PacketId.PickupSpawn:
+                    return PickupSpawn.Deserialize(stream);             //0x15
                 case PacketId.AddObjectVehicle:
                     return AddObjectVehicle.Deserialize(stream);        //0x17
                 case PacketId.MobSpawn:
@@ -96,6 +98,8 @@ namespace Sambuca
                     return EntityVelocity.Deserialize(stream);          //0x1C
                 case PacketId.PreChunk:
                     return PreChunk.Deserialize(stream);                //0x32
+                case PacketId.NewInvalidState:
+                    return NewInvalidState.Deserialize(stream);         //0x46
                 case PacketId.DisconnectKick:
                     return DisconnectKick.Deserialize(stream);          //0xFF
                 default:
@@ -553,6 +557,86 @@ namespace Sambuca
                 Console.WriteLine("  Onground: " + _OnGround);
             }
         }
+        public class PickupSpawn : Packet //0x15
+        {
+            private const PacketId PACKET_ID = PacketId.PickupSpawn;
+
+            private int _EntityId, _X, _Y, _Z;
+            private short _Item, _DamageData;
+            private byte _Count, _Rotation, _Pitch, _Roll;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public short Item { get { return _Item; } set { _Item = value; } }
+            public byte Count { get { return _Count; } set { _Count = value; } }
+            public short DamageData { get { return _DamageData; } set { _DamageData = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public int Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public byte Rotation { get { return _Rotation; } set { _Rotation = value; } }
+            public byte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public byte Roll { get { return _Roll; } set { _Roll = value; } }
+            public PickupSpawn(int entityid, short type, byte count, short damagedata, int x, int y, int z, byte rotation, byte pitch, byte roll)
+            {
+                this._EntityId = entityid;
+                this._Item = type;
+                this._Count = count;
+                this._DamageData = damagedata;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Rotation = rotation;
+                this._Pitch = pitch;
+                this._Roll = roll;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteShort(_Item), 0, sizeof(short));
+                        ms.WriteByte(_Count);
+                        ms.Write(Protocol.WriteShort(_DamageData), 0, sizeof(short));
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Y), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.WriteByte(_Rotation);
+                        ms.WriteByte(_Pitch);
+                        ms.WriteByte(_Roll);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PickupSpawn Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                short item = Protocol.ReadShort(stream);
+                byte count = (byte)stream.ReadByte();
+                short damagedata = Protocol.ReadShort(stream);
+                int x = Protocol.ReadInt(stream);
+                int y = Protocol.ReadInt(stream);
+                int z = Protocol.ReadInt(stream);
+                byte rotation = (byte)stream.ReadByte();
+                byte pitch = (byte)stream.ReadByte();
+                byte roll = (byte)stream.ReadByte();
+                return new PickupSpawn(entityid, item, count, damagedata, x, y, z, rotation, pitch, roll);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  EntityId: " + _EntityId);
+                Console.WriteLine("  Item: " + _Item);
+                Console.WriteLine("  Count: " + _Count);
+                Console.WriteLine("  DamageData: " + _DamageData);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Rotation: " + _Rotation);
+                Console.WriteLine("  Pitch: " + _Pitch);
+                Console.WriteLine("  Roll: " + _Roll);
+            }
+        }
         public class AddObjectVehicle : Packet //0x17
         {
             private const PacketId PACKET_ID = PacketId.AddObjectVehicle;
@@ -834,6 +918,40 @@ namespace Sambuca
                 Console.WriteLine("  X: " + _X);
                 Console.WriteLine("  Z: " + _Z);
                 Console.WriteLine("  Mode: " + _Mode);
+            }
+        }
+        public class NewInvalidState : Packet //0x32
+        {
+            private const PacketId PACKET_ID = PacketId.NewInvalidState;
+
+            private byte _Reason;
+            public byte Reason { get { return _Reason; } set { _Reason= value; } }
+            public NewInvalidState(byte reason)
+            {
+                this._Reason = reason;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.WriteByte(_Reason);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static NewInvalidState Deserialize(Stream stream)
+            {
+                byte reason = (byte)stream.ReadByte();
+                return new NewInvalidState(reason);
+            }
+            public void Dump()
+            {
+                Console.Write("  Reason: " + _Reason);
+                Console.WriteLine(_Reason == 0 ? " - Invalid Bed" : (_Reason == 1 ? " - Begin raining" : (_Reason == 2 ? " - End raining" : "")));
             }
         }
         public class DisconnectKick : Packet //0xFF

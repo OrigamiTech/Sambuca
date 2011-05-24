@@ -97,8 +97,14 @@ namespace Sambuca
                     case Packets.PacketId.PlayerPositionAndLook:
                         OnPacket_PlayerPositionAndLook((Packets.PlayerPositionAndLookIncoming)packet);
                         break;
+                    case Packets.PacketId.PickupSpawn:
+                        OnPacket_PickupSpawn((Packets.PickupSpawn)packet);
+                        break;
                     case Packets.PacketId.AddObjectVehicle:
                         OnPacket_AddObjectVehicle((Packets.AddObjectVehicle)packet);
+                        break;
+                    case Packets.PacketId.MobSpawn:
+                        OnPacket_MobSpawn((Packets.MobSpawn)packet);
                         break;
                     case Packets.PacketId.EntityPainting:
                         OnPacket_EntityPainting((Packets.EntityPainting)packet);
@@ -109,11 +115,14 @@ namespace Sambuca
                     case  Packets.PacketId.PreChunk:
                         OnPacket_PreChunk((Packets.PreChunk)packet);
                         break;
+                    case Packets.PacketId.NewInvalidState:
+                        OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
+                        break;
                     case Packets.PacketId.DisconnectKick:
                         OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
                         break;
                     default:
-                        //connection.Close();
+                        connection.Close();
                         break;
                 }
             }
