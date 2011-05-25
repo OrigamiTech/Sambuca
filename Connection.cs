@@ -65,69 +65,94 @@ namespace Sambuca
         {
             while(connection.Connected)
             {
-                int packetId = stream.ReadByte();
-                if(packetId == -1)
-                    break;
-                Packets.Packet packet = Packets.Deserialize((byte)packetId, stream);
-                if(_DebugLogging)
+                try
                 {
-                    Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
-                    packet.Dump();
+                    int packetId = stream.ReadByte();
+                    if(packetId == -1)
+                        break;
+                    Packets.Packet packet = Packets.Deserialize((byte)packetId, stream);
+                    if(_DebugLogging)
+                    {
+                        Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
+                        packet.Dump();
+                    }
+                    switch(packet.PacketId)
+                    {
+                        case Packets.PacketId.KeepAlive:
+                            OnPacket_KeepAlive((Packets.KeepAlive)packet);
+                            break;
+                        case Packets.PacketId.LoginRequest:
+                            OnPacket_LoginRequest((Packets.LoginRequestIncoming)packet);
+                            break;
+                        case Packets.PacketId.Handshake:
+                            OnPacket_Handshake((Packets.HandshakeIncoming)packet);
+                            break;
+                        case Packets.PacketId.ChatMessage:
+                            OnPacket_ChatMessage((Packets.ChatMessage)packet);
+                            break;
+                        case Packets.PacketId.TimeUpdate:
+                            OnPacket_TimeUpdate((Packets.TimeUpdate)packet);
+                            break;
+                        case Packets.PacketId.EntityEquipment:
+                            OnPacket_EntityEquipment((Packets.EntityEquipment)packet);
+                            break;
+                        case Packets.PacketId.SpawnPosition:
+                            OnPacket_SpawnPosition((Packets.SpawnPosition)packet);
+                            break;
+                        case Packets.PacketId.PlayerPositionAndLook:
+                            OnPacket_PlayerPositionAndLook((Packets.PlayerPositionAndLookIncoming)packet);
+                            break;
+                        case Packets.PacketId.NamedEntitySpawn:
+                            OnPacket_NamedEntitySpawn((Packets.NamedEntitySpawn)packet);
+                            break;
+                        case Packets.PacketId.PickupSpawn:
+                            OnPacket_PickupSpawn((Packets.PickupSpawn)packet);
+                            break;
+                        case Packets.PacketId.AddObjectVehicle:
+                            OnPacket_AddObjectVehicle((Packets.AddObjectVehicle)packet);
+                            break;
+                        case Packets.PacketId.MobSpawn:
+                            OnPacket_MobSpawn((Packets.MobSpawn)packet);
+                            break;
+                        case Packets.PacketId.EntityPainting:
+                            OnPacket_EntityPainting((Packets.EntityPainting)packet);
+                            break;
+                        case Packets.PacketId.EntityVelocity:
+                            OnPacket_EntityVelocity((Packets.EntityVelocity)packet);
+                            break;
+                        case Packets.PacketId.EntityRelativeMove:
+                            OnPacket_EntityRelativeMove((Packets.EntityRelativeMove)packet);
+                            break;
+                        case  Packets.PacketId.EntityLookAndRelativeMove:
+                            OnPacket_EntityLookAndRelativeMove((Packets.EntityLookAndRelativeMove)packet);
+                            break;
+                        case Packets.PacketId.PreChunk:
+                            OnPacket_PreChunk((Packets.PreChunk)packet);
+                            break;
+                        case Packets.PacketId.BlockChange:
+                            OnPacket_BlockChange((Packets.BlockChange)packet);
+                            break;
+                        case Packets.PacketId.NewInvalidState:
+                            OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
+                            break;
+                        case Packets.PacketId.SetSlot:
+                            OnPacket_SetSlot((Packets.SetSlot)packet);
+                            break;
+                        case Packets.PacketId.WindowItems:
+                            OnPacket_WindowItems((Packets.WindowItems)packet);
+                            break;
+                        case Packets.PacketId.DisconnectKick:
+                            OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
+                            break;
+                        default:
+                            SendPacket(new Packets.DisconnectKick("Sambuca encountered unknown packet 0x" + packetId.ToString("X2")));
+                            connection.Close(); // DEBUG OPTION
+                            break;
+                    }
+                    if(connection.Connected)
+                        SendPacket(new Packets.KeepAlive());
                 }
-                switch(packet.PacketId)
-                {
-                    case Packets.PacketId.KeepAlive:
-                        OnPacket_KeepAlive((Packets.KeepAlive)packet);
-                        break;
-                    case Packets.PacketId.LoginRequest:
-                        OnPacket_LoginRequest((Packets.LoginRequestIncoming)packet);
-                        break;
-                    case Packets.PacketId.Handshake:
-                        OnPacket_Handshake((Packets.HandshakeIncoming)packet);
-                        break;
-                    case Packets.PacketId.ChatMessage:
-                        OnPacket_ChatMessage((Packets.ChatMessage)packet);
-                        break;
-                    case Packets.PacketId.TimeUpdate:
-                        OnPacket_TimeUpdate((Packets.TimeUpdate)packet);
-                        break;
-                    case Packets.PacketId.SpawnPosition:
-                        OnPacket_SpawnPosition((Packets.SpawnPosition)packet);
-                        break;
-                    case Packets.PacketId.PlayerPositionAndLook:
-                        OnPacket_PlayerPositionAndLook((Packets.PlayerPositionAndLookIncoming)packet);
-                        break;
-                    case Packets.PacketId.PickupSpawn:
-                        OnPacket_PickupSpawn((Packets.PickupSpawn)packet);
-                        break;
-                    case Packets.PacketId.AddObjectVehicle:
-                        OnPacket_AddObjectVehicle((Packets.AddObjectVehicle)packet);
-                        break;
-                    case Packets.PacketId.MobSpawn:
-                        OnPacket_MobSpawn((Packets.MobSpawn)packet);
-                        break;
-                    case Packets.PacketId.EntityPainting:
-                        OnPacket_EntityPainting((Packets.EntityPainting)packet);
-                        break;
-                    case Packets.PacketId.EntityVelocity:
-                        OnPacket_EntityVelocity((Packets.EntityVelocity)packet);
-                        break;
-                    case  Packets.PacketId.PreChunk:
-                        OnPacket_PreChunk((Packets.PreChunk)packet);
-                        break;
-                    case Packets.PacketId.NewInvalidState:
-                        OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
-                        break;
-                    case Packets.PacketId.WindowItems:
-                        OnPacket_WindowItems((Packets.WindowItems)packet);
-                        break;
-                    case Packets.PacketId.DisconnectKick:
-                        OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
-                        break;
-                    default:
-                        connection.Close();
-                        break;
-                }
+                catch(Exception ex) { Console.WriteLine(ex.ToString()); }
             }
         }
         public void SendPacket(Packets.Packet packet)

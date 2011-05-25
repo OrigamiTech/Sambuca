@@ -8,15 +8,18 @@ namespace Sambuca
 {
     public static class Protocol
     {
+        private static byte[] ReverseByteArray(byte[] b)
+        {
+            byte[] b2 = new byte[b.Length];
+            for(int i = 0; i < b.Length; i++)
+                b2[b2.Length - 1 - i] = b[i];
+            return b2;
+        }
         public static short ReadShort(byte[] b)
         {
-            short s = 0;
-            for(int i = 0; i < sizeof(short); i++)
-            {
-                s <<= 8;
-                s |= b[i];
-            }
-            return s;
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToInt16(ReverseByteArray(b), 0);
+            return BitConverter.ToInt16(b, 0);
         }
         public static short ReadShort(Stream stream)
         {
@@ -27,13 +30,9 @@ namespace Sambuca
         }
         public static int ReadInt(byte[] b)
         {
-            int s = 0;
-            for(int i = 0; i < sizeof(int); i++)
-            {
-                s <<= 8;
-                s |= b[i];
-            }
-            return s;
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToInt32(ReverseByteArray(b), 0);
+            return BitConverter.ToInt32(b, 0);
         }
         public static int ReadInt(Stream stream)
         {
@@ -44,13 +43,9 @@ namespace Sambuca
         }
         public static long ReadLong(byte[] b)
         {
-            long s = 0;
-            for(int i = 0; i < sizeof(long); i++)
-            {
-                s <<= 8;
-                s |= b[i];
-            }
-            return s;
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToInt64(ReverseByteArray(b), 0);
+            return BitConverter.ToInt64(b, 0);
         }
         public static long ReadLong(Stream stream)
         {
@@ -61,23 +56,22 @@ namespace Sambuca
         }
         public static double ReadDouble(byte[] b)
         {
-            /*byte[] b2 = new byte[b.Length];
-            for(int i = 0; i < b.Length; i++)
-                b2[i] = b[b.Length - i - 1];
-            return BitConverter.ToDouble(b2, 0);*/
-            return BitConverter.Int64BitsToDouble(ReadLong(b));
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToDouble(ReverseByteArray(b), 0);
+            return BitConverter.ToDouble(b, 0);
         }
         public static double ReadDouble(Stream stream)
         {
-            /*byte[] b = new byte[sizeof(double)];
-            for(int i = 0; i < sizeof(double); i++)
-                b[b.Length - i - 1] = (byte)stream.ReadByte();
-            return BitConverter.ToDouble(b, 0);*/
-            return BitConverter.Int64BitsToDouble(ReadLong(stream));        // no idea if this shit works
+            byte[] b = new byte[sizeof(long)];
+            for(int i = 0; i < sizeof(long); i++)
+                b[i] = (byte)stream.ReadByte();
+            return ReadDouble(b);
         }
         public static float ReadFloat(byte[] b)
         {
-            return BitConverter.ToSingle(b, 0);        // no idea if this shit works either
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToSingle(ReverseByteArray(b), 0);
+            return BitConverter.ToSingle(b, 0);
         }
         public static float ReadFloat(Stream stream)
         {
@@ -92,7 +86,7 @@ namespace Sambuca
         }
         public static bool ReadBool(Stream stream)
         {
-            return stream.ReadByte() == 0x01;
+            return ReadBool(new byte[] { (byte)stream.ReadByte() });
         }
         public static string ReadString16(byte[] b)
         {
@@ -114,31 +108,32 @@ namespace Sambuca
 
         public static byte[] WriteShort(short s)
         {
-            byte[] b = new byte[sizeof(short)];
-            for(int j = 0; j < sizeof(short); j++)
-                b[j] = (byte)((s >> ((sizeof(short) - j - 1) * 8)) & 0xFF);
-            return b;
+            if(BitConverter.IsLittleEndian)
+                return ReverseByteArray(BitConverter.GetBytes(s));
+            return BitConverter.GetBytes(s);
         }
         public static byte[] WriteInt(int i)
         {
-            byte[] b = new byte[sizeof(int)];
-            for(int j = 0; j < sizeof(int); j++)
-                b[j] = (byte)((i >> ((sizeof(int) - j - 1) * 8)) & 0xFF);
-            return b;
+            if(BitConverter.IsLittleEndian)
+                return ReverseByteArray(BitConverter.GetBytes(i));
+            return BitConverter.GetBytes(i);
         }
         public static byte[] WriteLong(long l)
         {
-            byte[] b = new byte[sizeof(long)];
-            for(int j = 0; j < sizeof(long); j++)
-                b[j] = (byte)((l >> ((sizeof(long) - j - 1) * 8)) & 0xFF);
-            return b;
+            if(BitConverter.IsLittleEndian)
+                return ReverseByteArray(BitConverter.GetBytes(l));
+            return BitConverter.GetBytes(l);
         }
         public static byte[] WriteDouble(double d)
         {
+            if(BitConverter.IsLittleEndian)
+                return ReverseByteArray(BitConverter.GetBytes(d));
             return BitConverter.GetBytes(d);
         }
         public static byte[] WriteFloat(float f)
         {
+            if(BitConverter.IsLittleEndian)
+                return ReverseByteArray(BitConverter.GetBytes(f));
             return BitConverter.GetBytes(f);
         }
         public static byte[] WriteBool(bool b)
@@ -147,7 +142,6 @@ namespace Sambuca
         }
         public static byte[] WriteString16(string s)
         {
-            //return Encoding.BigEndianUnicode.GetBytes(s); 
             byte[] data = new byte[s.Length * 2];
             for(int i = 0; i < s.Length; i++)
             {

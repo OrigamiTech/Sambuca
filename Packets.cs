@@ -15,7 +15,7 @@ namespace Sambuca
             Handshake = 0x02,               //
             ChatMessage = 0x03,             //
             TimeUpdate = 0x04,              //
-            EntityEquipment = 0x05,
+            EntityEquipment = 0x05,         //
             SpawnPosition = 0x06,           //
             UseEntity = 0x07,
             UpdateHealth = 0x08,
@@ -30,7 +30,7 @@ namespace Sambuca
             UseBed = 0x11,
             Animation = 0x12,
             EntityAction = 0x13,
-            NamedEntitySpawn = 0x14,        // DO THIS NEXT
+            NamedEntitySpawn = 0x14,        //
             PickupSpawn = 0x15,             //
             CollectItem = 0x16,
             AddObjectVehicle = 0x17,        //
@@ -40,9 +40,9 @@ namespace Sambuca
             EntityVelocity = 0x1C,          //
             DestroyEntity = 0x1D,
             Entity = 0x1E,
-            EntityRelativeMove = 0x1F,
+            EntityRelativeMove = 0x1F,      //
             EntityLook = 0x20,
-            EntityLookAndRelativeMove = 0x21,
+            EntityLookAndRelativeMove = 0x21,   // DO THIS NEXT
             EntityTeleport = 0x22,
             EntityStatus = 0x26,
             AttachEntity = 0x27,
@@ -50,7 +50,7 @@ namespace Sambuca
             PreChunk = 0x32,                //
             MapChunk = 0x33,
             MultiBlockChange = 0x34,
-            BlockChange = 0x35,
+            BlockChange = 0x35,             //
             PlayNoteBlock = 0x36,
             Explosion = 0x3C,
             NewInvalidState = 0x46,         //
@@ -58,7 +58,7 @@ namespace Sambuca
             OpenWindow = 0x64,
             CloseWindow = 0x65,
             WindowClick = 0x66,
-            SetSlot = 0x67,
+            SetSlot = 0x67,                 //
             WindowItems = 0x68,             //
             UpdateProgressBar = 0x69,
             Transaction = 0x6A,
@@ -82,10 +82,14 @@ namespace Sambuca
                     return ChatMessage.Deserialize(stream);             //0x03
                 case PacketId.TimeUpdate:
                     return TimeUpdate.Deserialize(stream);              //0x04
+                case PacketId.EntityEquipment:
+                    return EntityEquipment.Deserialize(stream);         //0x05
                 case PacketId.SpawnPosition:
                     return SpawnPosition.Deserialize(stream);           //0x06
                 case PacketId.PlayerPositionAndLook:
                     return PlayerPositionAndLookIncoming.Deserialize(stream);   //0x0D
+                case PacketId.NamedEntitySpawn:
+                    return NamedEntitySpawn.Deserialize(stream);        //0x14
                 case PacketId.PickupSpawn:
                     return PickupSpawn.Deserialize(stream);             //0x15
                 case PacketId.AddObjectVehicle:
@@ -96,10 +100,18 @@ namespace Sambuca
                     return EntityPainting.Deserialize(stream);          //0x19
                 case PacketId.EntityVelocity:
                     return EntityVelocity.Deserialize(stream);          //0x1C
+                case PacketId.EntityRelativeMove:
+                    return EntityRelativeMove.Deserialize(stream);      //0x1F
+                case PacketId.EntityLookAndRelativeMove:
+                    return EntityLookAndRelativeMove.Deserialize(stream);   //0x21
                 case PacketId.PreChunk:
                     return PreChunk.Deserialize(stream);                //0x32
+                case PacketId.BlockChange:
+                    return BlockChange.Deserialize(stream);             //0x35
                 case PacketId.NewInvalidState:
                     return NewInvalidState.Deserialize(stream);         //0x46
+                case PacketId.SetSlot:
+                    return SetSlot.Deserialize(stream);                 //0x67
                 case PacketId.WindowItems:
                     return WindowItems.Deserialize(stream);             //0x68
                 case PacketId.DisconnectKick:
@@ -157,9 +169,9 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
-                        byte[] b_username = Protocol.WriteString16(_Username);
                         ms.Write(Protocol.WriteInt(_ProtocolVersion), 0, sizeof(int));
                         ms.Write(Protocol.WriteShort((short)_Username.Length), 0, sizeof(short));
+                        byte[] b_username = Protocol.WriteString16(_Username);
                         ms.Write(b_username, 0, b_username.Length);
                         ms.Write(Protocol.WriteLong(_MapSeed), 0, sizeof(long));
                         ms.WriteByte(_Dimension);
@@ -210,10 +222,10 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
-                        byte[] b_username = Protocol.WriteString16(_Unknown);
                         ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
                         ms.Write(Protocol.WriteShort((short)_Unknown.Length), 0, sizeof(short));
-                        ms.Write(b_username, 0, b_username.Length);
+                        byte[] b_unknown = Protocol.WriteString16(_Unknown);
+                        ms.Write(b_unknown, 0, b_unknown.Length);
                         ms.Write(Protocol.WriteLong(_MapSeed), 0, sizeof(long));
                         ms.WriteByte(_Dimension);
                         return ms.GetBuffer();
@@ -254,8 +266,8 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
-                        byte[] b_username = Protocol.WriteString16(_Username);
                         ms.Write(Protocol.WriteShort((short)_Username.Length), 0, sizeof(short));
+                        byte[] b_username = Protocol.WriteString16(_Username);
                         ms.Write(b_username, 0, b_username.Length);
                         return ms.GetBuffer();
                     }
@@ -289,8 +301,8 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
-                        byte[] b_connectionhash = Protocol.WriteString16(_ConnectionHash);
                         ms.Write(Protocol.WriteShort((short)_ConnectionHash.Length), 0, sizeof(short));
+                        byte[] b_connectionhash = Protocol.WriteString16(_ConnectionHash);
                         ms.Write(b_connectionhash, 0, b_connectionhash.Length);
                         return ms.GetBuffer();
                     }
@@ -331,6 +343,14 @@ namespace Sambuca
                     Yellow = COLOR_KEYCHAR + "e",
                     White = COLOR_KEYCHAR + "f";
             }
+            public static string Rainbow(string message)
+            {
+                string output = "";
+                string[] colors = new string[] { Colors.Red, Colors.Yellow, Colors.BrightGreen, Colors.Teal, Colors.Blue, Colors.Pink };
+                for(int i = 0; i < message.Length; i++)
+                    output += colors[i % colors.Length] + message[i];
+                return output;
+            }
 
             private string _Message;
             public string Message { get { return _Message; } set { _Message = value; } }
@@ -346,6 +366,7 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
+                        ms.Write(Protocol.WriteShort((short)_Message.Length), 0, sizeof(short)); 
                         byte[] b_message = Protocol.WriteString16(_Message);
                         ms.Write(b_message, 0, b_message.Length);
                         return ms.GetBuffer();
@@ -365,8 +386,8 @@ namespace Sambuca
                 {
                     if((short)_Message[i] == 0x00A7)
                     {
-                        i++;
-                        Console.ForegroundColor = Protocol.ChatColors[Convert.ToInt32(_Message[i].ToString(), 16)];
+                        //i++;
+                        Console.ForegroundColor = Protocol.ChatColors[Convert.ToInt32(_Message[++i].ToString(), 16)];
                     }
                     else
                         Console.Write(_Message[i]);
@@ -406,6 +427,55 @@ namespace Sambuca
             public void Dump()
             {
                 Console.WriteLine("  Time: " + _Time);
+            }
+        }
+        public class EntityEquipment : Packet //0x05
+        {
+            private const PacketId PACKET_ID = PacketId.EntityEquipment;
+
+            private int _EntityId;
+            private short _Slot, _ItemId, _Unknown;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public short Slot { get { return _Slot; } set { _Slot = value; } }
+            public short ItemId { get { return _ItemId; } set { _ItemId = value; } }
+            public short Unknown { get { return _Unknown; } set { _Unknown = value; } }
+            public EntityEquipment(int entityid, short slot, short itemid, short unknown)
+            {
+                this._EntityId = entityid;
+                this._Slot = slot;
+                this._ItemId = itemid;
+                this._Unknown = unknown;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteShort(_Slot), 0, sizeof(short));
+                        ms.Write(Protocol.WriteShort(_ItemId), 0, sizeof(short));
+                        ms.Write(Protocol.WriteShort(_Unknown), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityEquipment Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                short slot = Protocol.ReadShort(stream);
+                short itemid = Protocol.ReadShort(stream);
+                short unknown = Protocol.ReadShort(stream);
+                return new EntityEquipment(entityid, slot, itemid, unknown);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  Slot: " + _Slot);
+                Console.WriteLine("  Item ID: " + _ItemId);
+                Console.WriteLine("  Unknown: " + _Unknown);
             }
         }
         public class SpawnPosition : Packet //0x06
@@ -581,6 +651,79 @@ namespace Sambuca
                 Console.WriteLine("  Onground: " + _OnGround);
             }
         }
+        public class NamedEntitySpawn : Packet //0x14
+        {
+            private const PacketId PACKET_ID = PacketId.NamedEntitySpawn;
+
+            private int _EntityId, _X, _Y, _Z;
+            private string _PlayerName;
+            private byte _Rotation, _Pitch;
+            private short _Item;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public string PlayerName { get { return _PlayerName; } set { _PlayerName = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public int Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public byte Rotation { get { return _Rotation; } set { _Rotation = value; } }
+            public byte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public short Item { get { return _Item; } set { _Item = value; } }
+            public NamedEntitySpawn(int entityid, string playername, int x, int y, int z, byte rotation, byte pitch, short item)
+            {
+                this._EntityId = entityid;
+                this._PlayerName = playername;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Rotation = rotation;
+                this._Pitch = pitch;
+                this._Item = item;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        byte[] b_playername = Protocol.WriteString16(_PlayerName);
+                        ms.Write(Protocol.WriteShort((short)_PlayerName.Length), 0, sizeof(short)); 
+                        ms.Write(b_playername, 0, b_playername.Length);
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Y), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.WriteByte(_Rotation);
+                        ms.WriteByte(_Pitch);
+                        ms.Write(Protocol.WriteShort(_Item), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static NamedEntitySpawn Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                string playername = Protocol.ReadString16(stream);
+                int x = Protocol.ReadInt(stream);
+                int y = Protocol.ReadInt(stream);
+                int z = Protocol.ReadInt(stream);
+                byte rotation = (byte)stream.ReadByte();
+                byte pitch = (byte)stream.ReadByte();
+                short item = Protocol.ReadShort(stream);
+                return new NamedEntitySpawn(entityid, playername, x, y, z, rotation, pitch, item);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  EntityId: " + _EntityId);
+                Console.WriteLine("  PlayerName: " + _PlayerName);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Rotation: " + _Rotation);
+                Console.WriteLine("  Pitch: " + _Pitch);
+                Console.WriteLine("  Item: " + _Item);
+            }
+        }
         public class PickupSpawn : Packet //0x15
         {
             private const PacketId PACKET_ID = PacketId.PickupSpawn;
@@ -598,10 +741,10 @@ namespace Sambuca
             public byte Rotation { get { return _Rotation; } set { _Rotation = value; } }
             public byte Pitch { get { return _Pitch; } set { _Pitch = value; } }
             public byte Roll { get { return _Roll; } set { _Roll = value; } }
-            public PickupSpawn(int entityid, short type, byte count, short damagedata, int x, int y, int z, byte rotation, byte pitch, byte roll)
+            public PickupSpawn(int entityid, short item, byte count, short damagedata, int x, int y, int z, byte rotation, byte pitch, byte roll)
             {
                 this._EntityId = entityid;
-                this._Item = type;
+                this._Item = item;
                 this._Count = count;
                 this._DamageData = damagedata;
                 this._X = x;
@@ -820,8 +963,9 @@ namespace Sambuca
                 {
                     using(MemoryStream ms = new MemoryStream())
                     {
-                        byte[] b_title = Protocol.WriteString16(_Title);
                         ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteShort((short)_Title.Length), 0, sizeof(short)); 
+                        byte[] b_title = Protocol.WriteString16(_Title);
                         ms.Write(b_title, 0, b_title.Length);
                         ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
                         ms.Write(Protocol.WriteInt(_Y), 0, sizeof(int));
@@ -900,6 +1044,114 @@ namespace Sambuca
                 Console.WriteLine("  VZ: " + _VZ);
             }
         }
+        public class EntityRelativeMove : Packet //0x1F
+        {
+            private const PacketId PACKET_ID = PacketId.EntityRelativeMove;
+
+            private int _EntityId;
+            private byte _dX, _dY, _dZ;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public byte dX { get { return _dX; } set { _dX = value; } }
+            public byte dY { get { return _dY; } set { _dY = value; } }
+            public byte dZ { get { return _dZ; } set { _dZ = value; } }
+            public EntityRelativeMove(int entityid, byte dx, byte dy, byte dz)
+            {
+                this._EntityId = entityid;
+                this._dX = dx;
+                this._dY = dy;
+                this._dZ = dz;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.WriteByte(_dX);
+                        ms.WriteByte(_dY);
+                        ms.WriteByte(_dZ);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityRelativeMove Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                byte dx = (byte)stream.ReadByte(); 
+                byte dy = (byte)stream.ReadByte(); 
+                byte dz = (byte)stream.ReadByte();
+                return new EntityRelativeMove(entityid, dx, dy, dz);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  dX: " + _dX);
+                Console.WriteLine("  dY: " + _dY);
+                Console.WriteLine("  dZ: " + _dZ);
+            }
+        }
+        public class EntityLookAndRelativeMove : Packet //0x21
+        {
+            private const PacketId PACKET_ID = PacketId.EntityLookAndRelativeMove;
+
+            private int _EntityId;
+            private byte _dX, _dY, _dZ, _Yaw, _Pitch;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public byte dX { get { return _dX; } set { _dX = value; } }
+            public byte dY { get { return _dY; } set { _dY = value; } }
+            public byte dZ { get { return _dZ; } set { _dZ = value; } }
+            public byte Yaw { get { return _Yaw; } set { _Yaw = value; } }
+            public byte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public EntityLookAndRelativeMove(int entityid, byte dx, byte dy, byte dz, byte yaw, byte pitch)
+            {
+                this._EntityId = entityid;
+                this._dX = dx;
+                this._dY = dy;
+                this._dZ = dz;
+                this._Yaw = yaw;
+                this._Pitch = pitch;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.WriteByte(_dX);
+                        ms.WriteByte(_dY);
+                        ms.WriteByte(_dZ);
+                        ms.WriteByte(_Yaw);
+                        ms.WriteByte(_Pitch);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityLookAndRelativeMove Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                byte dx = (byte)stream.ReadByte();
+                byte dy = (byte)stream.ReadByte();
+                byte dz = (byte)stream.ReadByte();
+                byte yaw = (byte)stream.ReadByte();
+                byte pitch = (byte)stream.ReadByte();
+                return new EntityLookAndRelativeMove(entityid, dx, dy, dz, yaw, pitch);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  dX: " + _dX);
+                Console.WriteLine("  dY: " + _dY);
+                Console.WriteLine("  dZ: " + _dZ);
+                Console.WriteLine("  Yaw: " + _Yaw);
+                Console.WriteLine("  Pitch: " + _Pitch);
+            }
+        }
         public class PreChunk : Packet //0x32
         {
             private const PacketId PACKET_ID = PacketId.PreChunk;
@@ -944,7 +1196,61 @@ namespace Sambuca
                 Console.WriteLine("  Mode: " + _Mode);
             }
         }
-        public class NewInvalidState : Packet //0x32
+        public class BlockChange : Packet //0x35
+        {
+            private const PacketId PACKET_ID = PacketId.BlockChange;
+
+            private int _X, _Z;
+            private byte _Y, _BlockType, _BlockMetadata;
+            public int X { get { return _X; } set { _X = value; } }
+            public byte Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public byte BlockType { get { return _BlockType; } set { _BlockType = value; } }
+            public byte BlockMetadata { get { return _BlockMetadata; } set { _BlockMetadata = value; } }
+            public BlockChange(int x, byte y, int z, byte blocktype, byte blockmetadata)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._BlockType = blocktype;
+                this._BlockMetadata = blockmetadata;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.WriteByte(_Y);
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.WriteByte(_BlockType);
+                        ms.WriteByte(_BlockMetadata);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static BlockChange Deserialize(Stream stream)
+            {
+                int x = Protocol.ReadInt(stream);
+                byte y = (byte)stream.ReadByte();
+                int z = Protocol.ReadInt(stream);
+                byte blocktype = (byte)stream.ReadByte();
+                byte blockmetadata = (byte)stream.ReadByte();
+                return new BlockChange(x, y, z, blocktype, blockmetadata);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Block Type: " + _BlockType);
+                Console.WriteLine("  Block Metadata: " + _BlockMetadata);
+            }
+        }
+        public class NewInvalidState : Packet //0x46
         {
             private const PacketId PACKET_ID = PacketId.NewInvalidState;
 
@@ -978,7 +1284,66 @@ namespace Sambuca
                 Console.WriteLine(_Reason == 0 ? " - Invalid Bed" : (_Reason == 1 ? " - Begin raining" : (_Reason == 2 ? " - End raining" : "")));
             }
         }
+        public class SetSlot : Packet //0x67
+        {
+            private const PacketId PACKET_ID = PacketId.SetSlot;
 
+            private byte _WindowId, _ItemCount;
+            private short _Slot, _ItemID, _ItemUses;
+            public byte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public short Slot { get { return _Slot; } set { _Slot = value; } }
+            public short ItemID { get { return _ItemID; } set { _ItemID = value; } }
+            public byte ItemCount { get { return _ItemCount; } set { _ItemCount = value; } }
+            public short ItemUses { get { return _ItemUses; } set { _ItemUses = value; } }
+            public SetSlot(byte windowid, short slot, short itemid, byte itemcount, short itemuses)
+            {
+                this._WindowId = windowid;
+                this._Slot = slot;
+                this._ItemID = itemid;
+                this._ItemCount = itemcount;
+                this._ItemUses = itemuses;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.WriteByte(_WindowId);
+                        ms.Write(Protocol.WriteShort(_Slot), 0, sizeof(short));
+                        ms.Write(Protocol.WriteShort(_ItemID), 0, sizeof(short));
+                        if(_ItemID == -1)
+                            return ms.GetBuffer();
+                        ms.WriteByte(_ItemCount);
+                        ms.Write(Protocol.WriteShort(_ItemUses), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static SetSlot Deserialize(Stream stream)
+            {
+                byte windowid = (byte)stream.ReadByte();
+                short slot = Protocol.ReadShort(stream);
+                short itemid = Protocol.ReadShort(stream);
+                if(itemid == -1)
+                    return new SetSlot(windowid, slot, itemid, 0, 0);
+                byte itemcount = (byte)stream.ReadByte();
+                short itemuses = Protocol.ReadShort(stream);
+                return new SetSlot(windowid, slot, itemid, itemcount, itemuses);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  WindowId: " + _WindowId);
+                Console.WriteLine("  Slot: " + _Slot);
+                Console.WriteLine("  Item ID: " + _ItemID);
+                if(_ItemID == -1)
+                    return;
+                Console.WriteLine("  Item Count: " + _ItemCount);
+                Console.WriteLine("  Item Uses: " + _ItemUses);
+            }
+        }
         public class WindowItems : Packet //0x68
         {
             private const PacketId PACKET_ID = PacketId.WindowItems;
@@ -1039,7 +1404,6 @@ namespace Sambuca
                 Console.WriteLine();
             }
         }
-
         public class DisconnectKick : Packet //0xFF
         {
             private const PacketId PACKET_ID = PacketId.DisconnectKick;
