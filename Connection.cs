@@ -22,7 +22,9 @@ namespace Sambuca
         public string SessionId { get { return _SessionId; } }
 
         private bool _DebugLogging = true;
+        private bool _PacketDumping = true;
         public bool DebugLogging { get { return _DebugLogging; } set { _DebugLogging = value; } }
+        public bool PacketDumping { get { return _PacketDumping; } set { _PacketDumping = value; } }
 
         public bool Authenticate(bool useOldProtocol, string username, string password, string version)
         {
@@ -67,14 +69,16 @@ namespace Sambuca
             {
                 try
                 {
-                    int packetId = stream.ReadByte();
-                    if(packetId == -1)
+                    int packetId_ = stream.ReadByte();
+                    if(packetId_ == -1)
                         break;
-                    Packets.Packet packet = Packets.Deserialize((byte)packetId, stream);
+                    byte packetId = (byte)packetId_;
+                    Packets.Packet packet = Packets.Deserialize(packetId, stream);
                     if(_DebugLogging)
                     {
                         Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
-                        packet.Dump();
+                        if(_PacketDumping)
+                            packet.Dump();
                     }
                     switch(packet.PacketId)
                     {
@@ -99,8 +103,17 @@ namespace Sambuca
                         case Packets.PacketId.SpawnPosition:
                             OnPacket_SpawnPosition((Packets.SpawnPosition)packet);
                             break;
+                        case Packets.PacketId.UpdateHealth:
+                            OnPacket_UpdateHealth((Packets.UpdateHealth)packet);
+                            break;
+                        case Packets.PacketId.Respawn:
+                            OnPacket_Respawn((Packets.Respawn)packet);
+                            break;
                         case Packets.PacketId.PlayerPositionAndLook:
                             OnPacket_PlayerPositionAndLook((Packets.PlayerPositionAndLookIncoming)packet);
+                            break;
+                        case Packets.PacketId.Animation:
+                            OnPacket_Animation((Packets.Animation)packet);
                             break;
                         case Packets.PacketId.NamedEntitySpawn:
                             OnPacket_NamedEntitySpawn((Packets.NamedEntitySpawn)packet);
@@ -120,14 +133,29 @@ namespace Sambuca
                         case Packets.PacketId.EntityVelocity:
                             OnPacket_EntityVelocity((Packets.EntityVelocity)packet);
                             break;
+                        case Packets.PacketId.DestroyEntity:
+                            OnPacket_DestroyEntity((Packets.DestroyEntity)packet);
+                            break;
                         case Packets.PacketId.EntityRelativeMove:
                             OnPacket_EntityRelativeMove((Packets.EntityRelativeMove)packet);
                             break;
                         case  Packets.PacketId.EntityLookAndRelativeMove:
                             OnPacket_EntityLookAndRelativeMove((Packets.EntityLookAndRelativeMove)packet);
                             break;
+                        case Packets.PacketId.EntityStatus:
+                            OnPacket_EntityStatus((Packets.EntityStatus)packet);
+                            break;
+                        case Packets.PacketId.EntityMetadata:
+                            OnPacket_EntityMetadata((Packets.EntityMetadata)packet);
+                            break;
                         case Packets.PacketId.PreChunk:
                             OnPacket_PreChunk((Packets.PreChunk)packet);
+                            break;
+                        case Packets.PacketId.MapChunk:
+                            OnPacket_MapChunk((Packets.MapChunk)packet);
+                            break;
+                        case Packets.PacketId.MultiBlockChange:
+                            OnPacket_MultiBlockChange((Packets.MultiBlockChange)packet);
                             break;
                         case Packets.PacketId.BlockChange:
                             OnPacket_BlockChange((Packets.BlockChange)packet);
@@ -145,12 +173,13 @@ namespace Sambuca
                             OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
                             break;
                         default:
-                            SendPacket(new Packets.DisconnectKick("Sambuca encountered unknown packet 0x" + packetId.ToString("X2")));
+                            if(Enum.IsDefined(typeof(Packets.PacketId), packetId))
+                                SendPacket(new Packets.DisconnectKick("Sambuca encountered unimplemented packet 0x" + packetId.ToString("X2") + " " + ((Packets.PacketId)packetId).ToString()));
+                            else
+                                SendPacket(new Packets.DisconnectKick("Sambuca encountered unexpected packet 0x" + packetId.ToString("X2")));
                             connection.Close(); // DEBUG OPTION
                             break;
                     }
-                    if(connection.Connected)
-                        SendPacket(new Packets.KeepAlive());
                 }
                 catch(Exception ex) { Console.WriteLine(ex.ToString()); }
             }
@@ -161,7 +190,8 @@ namespace Sambuca
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
-                packet.Dump();
+                if(_PacketDumping)
+                    packet.Dump();
             }
             stream.WriteByte((byte)packet.PacketId);
             byte[] data = packet.Data;

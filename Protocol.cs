@@ -15,6 +15,14 @@ namespace Sambuca
                 b2[b2.Length - 1 - i] = b[i];
             return b2;
         }
+        public static sbyte ReadByte(byte[] b)
+        {
+            return (sbyte)b[0];
+        }
+        public static sbyte ReadByte(Stream stream)
+        {
+            return (sbyte)stream.ReadByte();
+        }
         public static short ReadShort(byte[] b)
         {
             if(BitConverter.IsLittleEndian)
@@ -103,9 +111,70 @@ namespace Sambuca
                 s += (char)ReadShort(stream);
             return s;
         }
+        public static byte[] ReadMetadata(Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+            /*
+              let x = 0 of type byte
+                 while (x = read byte from stream) does not equal 127:
+                     select based on value of (x >> 5):
+                         case 0: read byte from stream
+                         case 1: read short from stream
+                         case 2: read int from stream
+                         case 3: read float from stream
+                         case 4: read string from stream
+                         case 5: read short, byte, short from stream; save as item stack (id, count, damage, respectively)
+                         case 6: read int, int, int from stream; save as extra entity information.
+                     end select
+                 end while
+             */
+            byte field_type;
+            while((field_type = (byte)stream.ReadByte()) != 127)
+            {
+                ms.WriteByte(field_type);
+                switch(field_type >> 5)
+                {
+                    case 0:
+                        ms.Write(Protocol.WriteByte(Protocol.ReadByte(stream)), 0, sizeof(sbyte));
+                        break;
+                    case 1:
+                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
+                        break;
+                    case 2:
+                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
+                        break;
+                    case 3:
+                        ms.Write(Protocol.WriteFloat(Protocol.ReadFloat(stream)), 0, sizeof(float));
+                        break;
+                    case 4:
+                        byte[] b_string = Protocol.WriteString16(Protocol.ReadString16(stream));
+                        ms.Write(b_string, 0, b_string.Length);
+                        break;
+                    case 5:
+                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
+                        ms.Write(Protocol.WriteByte(Protocol.ReadByte(stream)), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
+                        break;
+                    case 6:
+                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
+                        break;
+                }
+            }
+            return ms.GetBuffer();
+        }
 
 
 
+        public static byte[] WriteByte(byte b)
+        {
+            return new byte[] { b };
+        }
+        public static byte[] WriteByte(sbyte b)
+        {
+            return new byte[] { (byte)b };
+        }
         public static byte[] WriteShort(short s)
         {
             if(BitConverter.IsLittleEndian)
@@ -142,14 +211,33 @@ namespace Sambuca
         }
         public static byte[] WriteString16(string s)
         {
-            byte[] data = new byte[s.Length * 2];
+            /*byte[] data = new byte[s.Length * 2 + sizeof(short)];
+            byte[] len = Protocol.WriteShort((short)s.Length);
+            for(int i=0;i<sizeof(short);i++)
+                data[i] = len[i];
             for(int i = 0; i < s.Length; i++)
             {
                 byte[] b = WriteShort((short)s[i]);
-                data[i * 2] = b[0];
-                data[i * 2 + 1] = b[1];
+                data[i * 2 + sizeof(short)] = b[0];
+                data[i * 2 + sizeof(short) + 1] = b[1];
             }
-            return data;
+            return data;*/
+            MemoryStream data = new MemoryStream();
+            data.Write(Protocol.WriteShort((short)(s.Length/* + 2*/)), 0, sizeof(short));
+            /*data.WriteByte(0x00);
+            data.WriteByte(0xA7);*/
+            Console.Write("STRING16: ");
+            for(int i = 0; i < s.Length; i++)
+            {
+                ushort char_ = (ushort)s[i];
+                data.WriteByte((byte)(char_ >> 8));
+                data.WriteByte((byte)(char_ & 0xFF));
+                Console.Write(((byte)(char_ >> 8)).ToString("X2"));
+                Console.Write(((byte)(char_ & 0xFF)).ToString("X2"));
+            }
+            Console.WriteLine();
+            //Console.ReadLine();
+            return data.GetBuffer();
         }
 
 
