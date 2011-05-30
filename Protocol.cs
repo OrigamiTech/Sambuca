@@ -105,11 +105,11 @@ namespace Sambuca
         }
         public static string ReadString16(Stream stream)
         {
-            string s = "";
             short len = ReadShort(stream);
-            for(int i = 0; i < len; i++)
-                s += (char)ReadShort(stream);
-            return s;
+            byte[] b = new byte[len * sizeof(short)];
+            for(int i = 0; i < b.Length; i++)
+                b[i] = (byte)ReadByte(stream);
+            return ReadString16(b);
         }
         public static byte[] ReadMetadata(Stream stream)
         {
@@ -223,20 +223,13 @@ namespace Sambuca
             }
             return data;*/
             MemoryStream data = new MemoryStream();
-            data.Write(Protocol.WriteShort((short)(s.Length/* + 2*/)), 0, sizeof(short));
-            /*data.WriteByte(0x00);
-            data.WriteByte(0xA7);*/
-            Console.Write("STRING16: ");
+            data.Write(Protocol.WriteShort((short)(s.Length)), 0, sizeof(short));
             for(int i = 0; i < s.Length; i++)
             {
                 ushort char_ = (ushort)s[i];
                 data.WriteByte((byte)(char_ >> 8));
                 data.WriteByte((byte)(char_ & 0xFF));
-                Console.Write(((byte)(char_ >> 8)).ToString("X2"));
-                Console.Write(((byte)(char_ & 0xFF)).ToString("X2"));
             }
-            Console.WriteLine();
-            //Console.ReadLine();
             return data.GetBuffer();
         }
 

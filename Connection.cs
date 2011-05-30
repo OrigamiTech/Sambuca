@@ -21,10 +21,15 @@ namespace Sambuca
         public string Username { get { return _Username; } }
         public string SessionId { get { return _SessionId; } }
 
-        private bool _DebugLogging = true;
-        private bool _PacketDumping = true;
-        public bool DebugLogging { get { return _DebugLogging; } set { _DebugLogging = value; } }
-        public bool PacketDumping { get { return _PacketDumping; } set { _PacketDumping = value; } }
+        private bool
+            _DebugLogIncoming = true,
+            _DebugLogOutgoing = true,
+            _PacketDumpIncoming = true,
+            _PacketDumpOutgoing = true;
+        public bool DebugLogIncoming { get { return _DebugLogIncoming; } set { _DebugLogIncoming = value; } }
+        public bool DebugLogOutgoing { get { return _DebugLogOutgoing; } set { _DebugLogOutgoing = value; } }
+        public bool PacketDumpIncoming { get { return _PacketDumpIncoming; } set { _PacketDumpIncoming = value; } }
+        public bool PacketDumpOutgoing { get { return _PacketDumpOutgoing; } set { _PacketDumpOutgoing = value; } }
 
         public bool Authenticate(bool useOldProtocol, string username, string password, string version)
         {
@@ -74,10 +79,10 @@ namespace Sambuca
                         break;
                     byte packetId = (byte)packetId_;
                     Packets.Packet packet = Packets.Deserialize(packetId, stream);
-                    if(_DebugLogging)
+                    if(_DebugLogIncoming)
                     {
                         Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
-                        if(_PacketDumping)
+                        if(_PacketDumpIncoming)
                             packet.Dump();
                     }
                     switch(packet.PacketId)
@@ -103,23 +108,53 @@ namespace Sambuca
                         case Packets.PacketId.SpawnPosition:
                             OnPacket_SpawnPosition((Packets.SpawnPosition)packet);
                             break;
+                        case Packets.PacketId.UseEntity:
+                            OnPacket_UseEntity((Packets.UseEntity)packet);
+                            break;
                         case Packets.PacketId.UpdateHealth:
                             OnPacket_UpdateHealth((Packets.UpdateHealth)packet);
                             break;
                         case Packets.PacketId.Respawn:
                             OnPacket_Respawn((Packets.Respawn)packet);
                             break;
+                        case Packets.PacketId.Player:
+                            OnPacket_Player((Packets.Player)packet);
+                            break;
+                        case Packets.PacketId.PlayerPosition:
+                            OnPacket_PlayerPosition((Packets.PlayerPosition)packet);
+                            break;
+                        case Packets.PacketId.PlayerLook:
+                            OnPacket_PlayerLook((Packets.PlayerLook)packet);
+                            break;
                         case Packets.PacketId.PlayerPositionAndLook:
                             OnPacket_PlayerPositionAndLook((Packets.PlayerPositionAndLookIncoming)packet);
                             break;
+                        case Packets.PacketId.PlayerDigging:
+                            OnPacket_PlayerDigging((Packets.PlayerDigging)packet);
+                            break;
+                        case Packets.PacketId.PlayerBlockPlacement:
+                            OnPacket_PlayerBlockPlacement((Packets.PlayerBlockPlacement)packet);
+                            break;
+                        case Packets.PacketId.HoldingChange:
+                            OnPacket_HoldingChange((Packets.HoldingChange)packet);
+                            break;
+                        case Packets.PacketId.UseBed:
+                            OnPacket_UseBed((Packets.UseBed)packet);
+                            break;
                         case Packets.PacketId.Animation:
                             OnPacket_Animation((Packets.Animation)packet);
+                            break;
+                        case Packets.PacketId.EntityAction:
+                            OnPacket_EntityAction((Packets.EntityAction)packet);
                             break;
                         case Packets.PacketId.NamedEntitySpawn:
                             OnPacket_NamedEntitySpawn((Packets.NamedEntitySpawn)packet);
                             break;
                         case Packets.PacketId.PickupSpawn:
                             OnPacket_PickupSpawn((Packets.PickupSpawn)packet);
+                            break;
+                        case Packets.PacketId.CollectItem:
+                            OnPacket_CollectItem((Packets.CollectItem)packet);
                             break;
                         case Packets.PacketId.AddObjectVehicle:
                             OnPacket_AddObjectVehicle((Packets.AddObjectVehicle)packet);
@@ -142,6 +177,9 @@ namespace Sambuca
                         case  Packets.PacketId.EntityLookAndRelativeMove:
                             OnPacket_EntityLookAndRelativeMove((Packets.EntityLookAndRelativeMove)packet);
                             break;
+                        case Packets.PacketId.EntityTeleport:
+                            OnPacket_EntityTeleport((Packets.EntityTeleport)packet);
+                            break;
                         case Packets.PacketId.EntityStatus:
                             OnPacket_EntityStatus((Packets.EntityStatus)packet);
                             break;
@@ -160,6 +198,9 @@ namespace Sambuca
                         case Packets.PacketId.BlockChange:
                             OnPacket_BlockChange((Packets.BlockChange)packet);
                             break;
+                        case Packets.PacketId.PlayNoteBlock:
+                            OnPacket_PlayNoteBlock((Packets.PlayNoteBlock)packet);
+                            break;
                         case Packets.PacketId.NewInvalidState:
                             OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
                             break;
@@ -169,14 +210,23 @@ namespace Sambuca
                         case Packets.PacketId.WindowItems:
                             OnPacket_WindowItems((Packets.WindowItems)packet);
                             break;
+                        case Packets.PacketId.UpdateSign:
+                            OnPacket_UpdateSign((Packets.UpdateSign)packet);
+                            break;
+                        case Packets.PacketId.IncrementStatistic:
+                            OnPacket_IncrementStatistic((Packets.IncrementStatistic)packet);
+                            break;
                         case Packets.PacketId.DisconnectKick:
                             OnPacket_DisconnectKick((Packets.DisconnectKick)packet);
                             break;
                         default:
+                            string message = "";
                             if(Enum.IsDefined(typeof(Packets.PacketId), packetId))
-                                SendPacket(new Packets.DisconnectKick("Sambuca encountered unimplemented packet 0x" + packetId.ToString("X2") + " " + ((Packets.PacketId)packetId).ToString()));
+                                message ="Sambuca encountered unimplemented packet 0x" + packetId.ToString("X2") + " " + ((Packets.PacketId)packetId).ToString();
                             else
-                                SendPacket(new Packets.DisconnectKick("Sambuca encountered unexpected packet 0x" + packetId.ToString("X2")));
+                                message = "Sambuca encountered unrecognised packet 0x" + packetId.ToString("X2");
+                            SendPacket(new Packets.DisconnectKick(message));
+                            Console.WriteLine(message);
                             connection.Close(); // DEBUG OPTION
                             break;
                     }
@@ -186,17 +236,17 @@ namespace Sambuca
         }
         public void SendPacket(Packets.Packet packet)
         {
-            if(_DebugLogging)
+            if(_DebugLogOutgoing)
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("0x" + ((byte)packet.PacketId).ToString("X2") + ' ' + packet.PacketId.ToString());
-                if(_PacketDumping)
+                if(_PacketDumpOutgoing)
                     packet.Dump();
             }
             stream.WriteByte((byte)packet.PacketId);
             byte[] data = packet.Data;
             stream.Write(data, 0, data.Length);
-            if(_DebugLogging)
+            if(_DebugLogOutgoing)
                 Console.ForegroundColor = ConsoleColor.Gray;
         }
     }

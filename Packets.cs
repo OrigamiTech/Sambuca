@@ -17,22 +17,22 @@ namespace Sambuca
             TimeUpdate = 0x04,              //
             EntityEquipment = 0x05,         //
             SpawnPosition = 0x06,           //
-            UseEntity = 0x07,
+            UseEntity = 0x07,               //
             UpdateHealth = 0x08,            //
             Respawn = 0x09,                 //
-            Player = 0x0A,
-            PlayerPosition = 0x0B,
-            PlayerLook = 0x0C,
+            Player = 0x0A,                  //
+            PlayerPosition = 0x0B,          //
+            PlayerLook = 0x0C,              //
             PlayerPositionAndLook = 0x0D,   //
-            PlayerDigging = 0x0E,
-            PlayerBlockPlacement = 0x0F,
-            HoldingChange = 0x10,
-            UseBed = 0x11,
+            PlayerDigging = 0x0E,           //
+            PlayerBlockPlacement = 0x0F,    //
+            HoldingChange = 0x10,           //
+            UseBed = 0x11,                  //
             Animation = 0x12,               //
-            EntityAction = 0x13,
+            EntityAction = 0x13,            //
             NamedEntitySpawn = 0x14,        //
             PickupSpawn = 0x15,             //
-            CollectItem = 0x16,
+            CollectItem = 0x16,             //
             AddObjectVehicle = 0x17,        //
             MobSpawn = 0x18,                //
             EntityPainting = 0x19,          //
@@ -43,15 +43,15 @@ namespace Sambuca
             EntityRelativeMove = 0x1F,      //
             EntityLook = 0x20,
             EntityLookAndRelativeMove = 0x21,   //
-            EntityTeleport = 0x22,
+            EntityTeleport = 0x22,          //
             EntityStatus = 0x26,            //
             AttachEntity = 0x27,
             EntityMetadata = 0x28,          //
             PreChunk = 0x32,                //
             MapChunk = 0x33,                //
-            MultiBlockChange = 0x34,        // DO THIS NEXT
+            MultiBlockChange = 0x34,        //
             BlockChange = 0x35,             //
-            PlayNoteBlock = 0x36,
+            PlayNoteBlock = 0x36,           //
             Explosion = 0x3C,
             NewInvalidState = 0x46,         //
             Weather = 0x47,
@@ -62,8 +62,8 @@ namespace Sambuca
             WindowItems = 0x68,             //
             UpdateProgressBar = 0x69,
             Transaction = 0x6A,
-            UpdateSign = 0x82,
-            IncrementStatistic = 0xC8,
+            UpdateSign = 0x82,              //
+            IncrementStatistic = 0xC8,      //
             DisconnectKick = 0xFF,          //
         }
 
@@ -86,18 +86,38 @@ namespace Sambuca
                     return EntityEquipment.Deserialize(stream);         //0x05
                 case PacketId.SpawnPosition:
                     return SpawnPosition.Deserialize(stream);           //0x06
+                case PacketId.UseEntity:
+                    return UseEntity.Deserialize(stream);               //0x07
                 case PacketId.UpdateHealth:
                     return UpdateHealth.Deserialize(stream);            //0x08
                 case PacketId.Respawn:
                     return new Respawn();                               //0x09
+                case PacketId.Player:
+                    return Player.Deserialize(stream);                  //0x0A
+                case PacketId.PlayerPosition:
+                    return PlayerPosition.Deserialize(stream);          //0x0B
+                case PacketId.PlayerLook:
+                    return PlayerLook.Deserialize(stream);              //0x0C
                 case PacketId.PlayerPositionAndLook:
                     return PlayerPositionAndLookIncoming.Deserialize(stream);   //0x0D
+                case PacketId.PlayerDigging:
+                    return PlayerDigging.Deserialize(stream);           //0x0E
+                case PacketId.PlayerBlockPlacement:
+                    return PlayerBlockPlacement.Deserialize(stream);    //0x0F
+                case PacketId.HoldingChange:
+                    return HoldingChange.Deserialize(stream);           //0x10
+                case PacketId.UseBed:
+                    return UseBed.Deserialize(stream);                  //0x11
                 case PacketId.Animation:
                     return Animation.Deserialize(stream);               //0x12
+                case PacketId.EntityAction:
+                    return EntityAction.Deserialize(stream);            //0x13
                 case PacketId.NamedEntitySpawn:
                     return NamedEntitySpawn.Deserialize(stream);        //0x14
                 case PacketId.PickupSpawn:
                     return PickupSpawn.Deserialize(stream);             //0x15
+                case PacketId.CollectItem:
+                    return CollectItem.Deserialize(stream);             //0x16
                 case PacketId.AddObjectVehicle:
                     return AddObjectVehicle.Deserialize(stream);        //0x17
                 case PacketId.MobSpawn:
@@ -112,6 +132,8 @@ namespace Sambuca
                     return EntityRelativeMove.Deserialize(stream);      //0x1F
                 case PacketId.EntityLookAndRelativeMove:
                     return EntityLookAndRelativeMove.Deserialize(stream);   //0x21
+                case PacketId.EntityTeleport:
+                    return EntityTeleport.Deserialize(stream);          //0x22
                 case PacketId.EntityStatus:
                     return EntityStatus.Deserialize(stream);            //0x26
                 case PacketId.EntityMetadata:
@@ -124,12 +146,18 @@ namespace Sambuca
                     return MultiBlockChange.Deserialize(stream);        //0x34
                 case PacketId.BlockChange:
                     return BlockChange.Deserialize(stream);             //0x35
+                case PacketId.PlayNoteBlock:
+                    return PlayNoteBlock.Deserialize(stream);           //0x36
                 case PacketId.NewInvalidState:
                     return NewInvalidState.Deserialize(stream);         //0x46
                 case PacketId.SetSlot:
                     return SetSlot.Deserialize(stream);                 //0x67
                 case PacketId.WindowItems:
                     return WindowItems.Deserialize(stream);             //0x68
+                case PacketId.UpdateSign:
+                    return UpdateSign.Deserialize(stream);              //0x82
+                case PacketId.IncrementStatistic:
+                    return IncrementStatistic.Deserialize(stream);      //0xC8
                 case PacketId.DisconnectKick:
                     return DisconnectKick.Deserialize(stream);          //0xFF
                 default:
@@ -338,7 +366,7 @@ namespace Sambuca
         {
             private const PacketId PACKET_ID = PacketId.ChatMessage;
 
-            public static class Colors
+            /*public static class Colors
             {
                 public const char
                     COLOR_KEYCHAR = '§';
@@ -367,6 +395,22 @@ namespace Sambuca
                 for(int i = 0; i < message.Length; i++)
                     output += colors[i % colors.Length] + message[i];
                 return output;
+            }*/
+            public static string StripColors(string message)
+            {
+                for(int i = 0; i < 16; i++)
+                    message = message.Replace("§" + i.ToString("x1"), "");
+                return message;
+            }
+            public static void PrintMessage(string message)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                for(int i = 0; i < message.Length; i++)
+                    if((short)message[i] == 0x00A7)
+                        Console.ForegroundColor = Protocol.ChatColors[Convert.ToInt32(message[++i].ToString(), 16)];
+                    else
+                        Console.Write(message[i]);
+                Console.WriteLine();
             }
 
             private string _Message;
@@ -397,8 +441,9 @@ namespace Sambuca
             }
             public void Dump()
             {
-                Console.Write("  Message: ");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("  Raw Message: " + _Message);
+                Console.Write("  Colored Message: ");
+                /*Console.ForegroundColor = ConsoleColor.White;
                 for(int i = 0; i < _Message.Length; i++)
                 {
                     if((short)_Message[i] == 0x00A7)
@@ -409,7 +454,8 @@ namespace Sambuca
                     else
                         Console.Write(_Message[i]);
                 }
-                Console.WriteLine();
+                Console.WriteLine();*/
+                PrintMessage(_Message);
                 Console.ForegroundColor = ConsoleColor.Gray;
             }
         }
@@ -538,6 +584,50 @@ namespace Sambuca
                 Console.WriteLine("  Z: " + _Z);
             }
         }
+        public class UseEntity : Packet //0x07
+        {
+            private const PacketId PACKET_ID = PacketId.UseEntity;
+
+            private int _User, _Target;
+            private bool _LeftClick;
+            public int User { get { return _User; } set { _User = value; } }
+            public int Target { get { return _Target; } set { _Target = value; } }
+            public bool LeftClick { get { return _LeftClick; } set { _LeftClick = value; } }
+            public UseEntity(int user, int target, bool leftclick)
+            {
+                this._User = user;
+                this._Target = target;
+                this._LeftClick = leftclick;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_User), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Target), 0, sizeof(int));
+                        ms.Write(Protocol.WriteBool(_LeftClick), 0, sizeof(byte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static UseEntity Deserialize(Stream stream)
+            {
+                int user = Protocol.ReadInt(stream);
+                int target = Protocol.ReadInt(stream);
+                bool leftclick = Protocol.ReadBool(stream);
+                return new UseEntity(user, target, leftclick);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  User: " + _User);
+                Console.WriteLine("  Target: " + _Target);
+                Console.WriteLine("  Left-Click: " + _LeftClick);
+            }
+        }
         public class UpdateHealth : Packet //0x08
         {
             private const PacketId PACKET_ID = PacketId.UpdateHealth;
@@ -578,17 +668,148 @@ namespace Sambuca
             public byte[] Data { get { return new byte[0]; } }
             public void Dump() { }
         }
+        public class Player : Packet //0x0A
+        {
+            private const PacketId PACKET_ID = PacketId.Player;
+
+            private bool _OnGround;
+            public bool OnGround { get { return _OnGround; } set { _OnGround = value; } }
+            public Player(bool onground)
+            {
+                this._OnGround = onground;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteBool(_OnGround), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static Player Deserialize(Stream stream)
+            {
+                bool onground = Protocol.ReadBool(stream);
+                return new Player(onground);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  OnGround: " + _OnGround);
+            }
+        }
+        public class PlayerPosition : Packet //0x0B
+        {
+            private const PacketId PACKET_ID = PacketId.PlayerPositionAndLook;
+
+            private double _X, _Y, _Stance, _Z;
+            private bool _OnGround;
+            public double X { get { return _X; } set { _X = value; } }
+            public double Y { get { return _Y; } set { _Y = value; } }
+            public double Stance { get { return _Stance; } set { _Stance = value; } }
+            public double Z { get { return _Z; } set { _Z = value; } }
+            public bool OnGround { get { return _OnGround; } set { _OnGround = value; } }
+            public PlayerPosition(double x, double y, double stance, double z, bool onground)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Stance = stance;
+                this._Z = z;
+                this._OnGround = onground;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteDouble(_X), 0, sizeof(double));
+                        ms.Write(Protocol.WriteDouble(_Y), 0, sizeof(double));
+                        ms.Write(Protocol.WriteDouble(_Stance), 0, sizeof(double));
+                        ms.Write(Protocol.WriteDouble(_Z), 0, sizeof(double));
+                        ms.Write(Protocol.WriteBool(_OnGround), 0, 1);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PlayerPosition Deserialize(Stream stream)
+            {
+                double x = Protocol.ReadDouble(stream);
+                double y = Protocol.ReadDouble(stream);
+                double stance = Protocol.ReadDouble(stream);
+                double z = Protocol.ReadDouble(stream);
+                bool onground = Protocol.ReadBool(stream);
+                return new PlayerPosition(x, y, stance, z, onground);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Stance: " + _Stance);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Onground: " + _OnGround);
+            }
+        }
+        public class PlayerLook : Packet //0x0C
+        {
+            private const PacketId PACKET_ID = PacketId.PlayerPositionAndLook;
+
+            private float _Yaw, _Pitch;
+            private bool _OnGround;
+            public float Yaw { get { return _Yaw; } set { _Yaw = value; } }
+            public float Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public bool OnGround { get { return _OnGround; } set { _OnGround = value; } }
+            public PlayerLook(float yaw, float pitch, bool onground)
+            {
+                this._Yaw = yaw;
+                this._Pitch = pitch;
+                this._OnGround = onground;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteFloat(_Yaw), 0, sizeof(float));
+                        ms.Write(Protocol.WriteFloat(_Pitch), 0, sizeof(float));
+                        ms.Write(Protocol.WriteBool(_OnGround), 0, 1);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PlayerLook Deserialize(Stream stream)
+            {
+                float yaw = Protocol.ReadFloat(stream);
+                float pitch = Protocol.ReadFloat(stream);
+                bool onground = Protocol.ReadBool(stream);
+                return new PlayerLook(yaw, pitch, onground);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Yaw: " + _Yaw);
+                Console.WriteLine("  Pitch: " + _Pitch);
+                Console.WriteLine("  Onground: " + _OnGround);
+            }
+        }
         public class PlayerPositionAndLookOutgoing : Packet //0x0D
         {
             private const PacketId PACKET_ID = PacketId.PlayerPositionAndLook;
 
-            private double _X, _Y, _Z, _Stance;
+            private double _X, _Y, _Stance, _Z;
             private float _Yaw, _Pitch;
             private bool _OnGround;
             public double X { get { return _X; } set { _X = value; } }
             public double Y { get { return _Y; } set { _Y = value; } }
-            public double Z { get { return _Z; } set { _Z = value; } }
             public double Stance { get { return _Stance; } set { _Stance = value; } }
+            public double Z { get { return _Z; } set { _Z = value; } }
             public float Yaw { get { return _Yaw; } set { _Yaw = value; } }
             public float Pitch { get { return _Pitch; } set { _Pitch = value; } }
             public bool OnGround { get { return _OnGround; } set { _OnGround = value; } }
@@ -647,13 +868,13 @@ namespace Sambuca
         {
             private const PacketId PACKET_ID = PacketId.PlayerPositionAndLook;
 
-            private double _X, _Y, _Z, _Stance;
+            private double _X, _Stance, _Y, _Z;
             private float _Yaw, _Pitch;
             private bool _OnGround;
             public double X { get { return _X; } set { _X = value; } }
+            public double Stance { get { return _Stance; } set { _Stance = value; } }
             public double Y { get { return _Y; } set { _Y = value; } }
             public double Z { get { return _Z; } set { _Z = value; } }
-            public double Stance { get { return _Stance; } set { _Stance = value; } }
             public float Yaw { get { return _Yaw; } set { _Yaw = value; } }
             public float Pitch { get { return _Pitch; } set { _Pitch = value; } }
             public bool OnGround { get { return _OnGround; } set { _OnGround = value; } }
@@ -708,6 +929,212 @@ namespace Sambuca
                 Console.WriteLine("  Onground: " + _OnGround);
             }
         }
+        public class PlayerDigging : Packet //0x0E
+        {
+            private const PacketId PACKET_ID = PacketId.PlayerDigging;
+
+            private sbyte _Status, _Y, _Face;
+            private int _X, _Z;
+            public sbyte Status { get { return _Status; } set { _Status = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public sbyte Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public sbyte Face { get { return _Face; } set { _Face = value; } }
+            public PlayerDigging(sbyte status, int x, sbyte y, int z, sbyte face)
+            {
+                this._Status = status;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Face = face;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_Status), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Y), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Face), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PlayerDigging Deserialize(Stream stream)
+            {
+                sbyte status = Protocol.ReadByte(stream);
+                int x = Protocol.ReadInt(stream);
+                sbyte y = Protocol.ReadByte(stream);
+                int z = Protocol.ReadInt(stream);
+                sbyte face = Protocol.ReadByte(stream);
+                return new PlayerDigging(status, x, y, z, face);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Status: " + _Status);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Face: " + _Face);
+            }
+        }
+        public class PlayerBlockPlacement : Packet //0x0F
+        {
+            private const PacketId PACKET_ID = PacketId.PlayerBlockPlacement;
+
+            private sbyte _Y, _Direction, _Amount;
+            private int _X, _Z;
+            private short _BlockId, _Damage;
+            public int X { get { return _X; } set { _X = value; } }
+            public sbyte Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public sbyte Direction { get { return _Direction; } set { _Direction = value; } }
+            public short BlockId { get { return _BlockId; } set { _BlockId = value; } }
+            public sbyte Amount { get { return _Amount; } set { _Amount = value; } }
+            public short Damage { get { return _Damage; } set { _Damage = value; } }
+            public PlayerBlockPlacement(int x, sbyte y, int z, sbyte direction, short blockid, sbyte amount, short damage)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Direction = direction;
+                this._BlockId = blockid;
+                this._Amount = amount;
+                this._Damage = damage;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Y), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Direction), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_BlockId), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_Amount), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_Damage), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PlayerBlockPlacement Deserialize(Stream stream)
+            {
+                int x = Protocol.ReadInt(stream);
+                sbyte y = Protocol.ReadByte(stream);
+                int z = Protocol.ReadInt(stream);
+                sbyte direction = Protocol.ReadByte(stream);
+                short blockid = Protocol.ReadShort(stream);
+                sbyte amount = Protocol.ReadByte(stream);
+                short damage = Protocol.ReadShort(stream);
+                return new PlayerBlockPlacement(x, y, z, direction, blockid, amount, damage);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Direction: " + _Direction);
+                Console.WriteLine("  Block ID: " + _BlockId);
+                Console.WriteLine("  Amount: " + _Amount);
+                Console.WriteLine("  Damage: " + _Damage);
+            }
+        }
+        public class HoldingChange : Packet //0x10
+        {
+            private const PacketId PACKET_ID = PacketId.HoldingChange;
+
+            private short _SlotId;
+            public short SlotId { get { return _SlotId; } set { _SlotId = value; } }
+            public HoldingChange(short slotid)
+            {
+                this._SlotId = slotid;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteShort(_SlotId), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static HoldingChange Deserialize(Stream stream)
+            {
+                short slotid = Protocol.ReadShort(stream);
+                return new HoldingChange(slotid);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Slot ID: " + _SlotId);
+            }
+        }
+        public class UseBed : Packet //0x11
+        {
+            private const PacketId PACKET_ID = PacketId.UseBed;
+
+            private int _EntityId, _X, _Z;
+            private sbyte _InBed, _Y;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public sbyte InBed { get { return _InBed; } set { _InBed = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public sbyte Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public UseBed(int entityid, sbyte inbed, int x, sbyte y, int z)
+            {
+                this._EntityId = entityid;
+                this._InBed = inbed;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_InBed), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Y), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static UseBed Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                sbyte inbed = Protocol.ReadByte(stream);
+                int x = Protocol.ReadInt(stream);
+                sbyte y = Protocol.ReadByte(stream);
+                int z = Protocol.ReadInt(stream);
+                return new UseBed(entityid, inbed, x, y, z);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  In Bed: " + _InBed);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+            }
+        }
         public class Animation : Packet //0x12
         {
             private const PacketId PACKET_ID = PacketId.Animation;
@@ -715,7 +1142,7 @@ namespace Sambuca
             private int _EntityId;
             private sbyte _Animate;
             public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
-            public sbyte Rotation { get { return _Animate; } set { _Animate = value; } }
+            public sbyte Animate { get { return _Animate; } set { _Animate = value; } }
             public Animation(int entityid, sbyte animate)
             {
                 this._EntityId = entityid;
@@ -745,6 +1172,45 @@ namespace Sambuca
             {
                 Console.WriteLine("  EntityId: " + _EntityId);
                 Console.WriteLine("  Animate: " + _Animate);
+            }
+        }
+        public class EntityAction : Packet //0x13
+        {
+            private const PacketId PACKET_ID = PacketId.EntityAction;
+
+            private int _EntityId;
+            private sbyte _Action;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public sbyte Action { get { return _Action; } set { _Action = value; } }
+            public EntityAction(int entityid, sbyte action)
+            {
+                this._EntityId = entityid;
+                this._Action = action;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Action), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityAction Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                sbyte action = Protocol.ReadByte(stream);
+                return new EntityAction(entityid, action);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  EntityId: " + _EntityId);
+                Console.WriteLine("  Action: " + _Action);
             }
         }
         public class NamedEntitySpawn : Packet //0x14
@@ -898,6 +1364,44 @@ namespace Sambuca
                 Console.WriteLine("  Rotation: " + _Rotation);
                 Console.WriteLine("  Pitch: " + _Pitch);
                 Console.WriteLine("  Roll: " + _Roll);
+            }
+        }
+        public class CollectItem : Packet //0x16
+        {
+            private const PacketId PACKET_ID = PacketId.CollectItem;
+
+            private int _CollectedEntityId, _CollectorEntityId;
+            public int CollectedEntityId { get { return _CollectedEntityId; } set { _CollectedEntityId = value; } }
+            public int CollectorEntityId { get { return _CollectorEntityId; } set { _CollectorEntityId = value; } }
+            public CollectItem(int collectedentityid, int collectorentityid)
+            {
+                this._CollectedEntityId = collectedentityid;
+                this._CollectorEntityId = collectorentityid;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_CollectedEntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_CollectorEntityId), 0, sizeof(int));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static CollectItem Deserialize(Stream stream)
+            {
+                int collectedentityid = Protocol.ReadInt(stream);
+                int collectorentityid = Protocol.ReadInt(stream);
+                return new CollectItem(collectedentityid, collectorentityid);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Collected Entity ID: " + _CollectedEntityId);
+                Console.WriteLine("  Collector Entity ID: " + _CollectorEntityId);
             }
         }
         public class AddObjectVehicle : Packet //0x17
@@ -1278,6 +1782,65 @@ namespace Sambuca
                 Console.WriteLine("  Pitch: " + _Pitch);
             }
         }
+        public class EntityTeleport : Packet //0x22
+        {
+            private const PacketId PACKET_ID = PacketId.EntityTeleport;
+
+            private int _EntityId, _X, _Y, _Z;
+            private sbyte _Yaw, _Pitch;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public int Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public sbyte Yaw { get { return _Yaw; } set { _Yaw = value; } }
+            public sbyte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public EntityTeleport(int entityid, int x, int y, int z, sbyte yaw, sbyte pitch)
+            {
+                this._EntityId = entityid;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Yaw = yaw;
+                this._Pitch = pitch;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Y), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_Yaw), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_Pitch), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityTeleport Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                int x = Protocol.ReadInt(stream);
+                int y = Protocol.ReadInt(stream);
+                int z = Protocol.ReadInt(stream);
+                sbyte yaw = Protocol.ReadByte(stream);
+                sbyte pitch = Protocol.ReadByte(stream);
+                return new EntityTeleport(entityid, x, y, z, yaw, pitch);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Yaw: " + _Yaw);
+                Console.WriteLine("  Pitch: " + _Pitch);
+            }
+        }
         public class EntityStatus : Packet //0x26
         {
             private const PacketId PACKET_ID = PacketId.EntityStatus;
@@ -1594,6 +2157,61 @@ namespace Sambuca
                 Console.WriteLine("  Block Metadata: " + _BlockMetadata);
             }
         }
+        public class PlayNoteBlock : Packet //0x36
+        {
+            private const PacketId PACKET_ID = PacketId.PlayNoteBlock;
+
+            private int _X, _Z;
+            private short _Y;
+            private sbyte _Instrument, _Pitch;
+            public int X { get { return _X; } set { _X = value; } }
+            public short Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public sbyte Instrument { get { return _Instrument; } set { _Instrument = value; } }
+            public sbyte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public PlayNoteBlock(int x, short y, int z, sbyte instrument, sbyte pitch)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Instrument = instrument;
+                this._Pitch = pitch;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteShort(_Y), 0, sizeof(short));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Instrument), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_Pitch), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static PlayNoteBlock Deserialize(Stream stream)
+            {
+                int x = Protocol.ReadInt(stream);
+                short y = Protocol.ReadShort(stream);
+                int z = Protocol.ReadInt(stream);
+                sbyte instrument = Protocol.ReadByte(stream);
+                sbyte pitch = Protocol.ReadByte(stream);
+                return new PlayNoteBlock(x, y, z, instrument, pitch);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Instrument: " + _Instrument);
+                Console.WriteLine("  Pitch: " + _Pitch);
+            }
+        }
         public class NewInvalidState : Packet //0x46
         {
             private const PacketId PACKET_ID = PacketId.NewInvalidState;
@@ -1747,6 +2365,114 @@ namespace Sambuca
                 for(int i = 0; i < _Payload.Length; i++)
                     Console.Write(_Payload[i].ToString("X2"));
                 Console.WriteLine();
+            }
+        }
+        public class UpdateSign : Packet //0x82
+        {
+            private const PacketId PACKET_ID = PacketId.UpdateSign;
+
+            private int _X, _Z;
+            private short _Y;
+            private string _Text1, _Text2, _Text3, _Text4;
+            public int X { get { return _X; } set { _X = value; } }
+            public short Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public string Text1 { get { return _Text1; } set { _Text1 = value; } }
+            public string Text2 { get { return _Text2; } set { _Text2 = value; } }
+            public string Text3 { get { return _Text3; } set { _Text3 = value; } }
+            public string Text4 { get { return _Text4; } set { _Text4 = value; } }
+            public UpdateSign(int x,short y, int z, string text1, string text2, string text3, string text4)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Text1 = text1;
+                this._Text2 = text2;
+                this._Text3 = text3;
+                this._Text4 = text4;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteShort(_Y), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        byte[] b_text1 = Protocol.WriteString16(_Text1);
+                        byte[] b_text2 = Protocol.WriteString16(_Text2);
+                        byte[] b_text3 = Protocol.WriteString16(_Text3);
+                        byte[] b_text4 = Protocol.WriteString16(_Text4);
+                        ms.Write(b_text1, 0, b_text1.Length);
+                        ms.Write(b_text2, 0, b_text2.Length);
+                        ms.Write(b_text3, 0, b_text3.Length);
+                        ms.Write(b_text4, 0, b_text4.Length);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static UpdateSign Deserialize(Stream stream)
+            {
+                int x = Protocol.ReadInt(stream);
+                short y = Protocol.ReadShort(stream);
+                int z = Protocol.ReadInt(stream);
+                string text1 = Protocol.ReadString16(stream);
+                string text2 = Protocol.ReadString16(stream);
+                string text3 = Protocol.ReadString16(stream);
+                string text4 = Protocol.ReadString16(stream);
+                return new UpdateSign(x, y, z, text1, text2, text3, text4);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Text1: " + _Text1);
+                Console.WriteLine("  Text2: " + _Text2);
+                Console.WriteLine("  Text3: " + _Text3);
+                Console.WriteLine("  Text4: " + _Text4);
+            }
+        }
+        public class IncrementStatistic : Packet //0xC8
+        {
+            private const PacketId PACKET_ID = PacketId.UpdateSign;
+
+            private int _StatisticId;
+            private sbyte _Amount;
+            public int StatisticId { get { return _StatisticId; } set { _StatisticId = value; } }
+            public sbyte Amount { get { return _Amount; } set { _Amount = value; } }
+            public IncrementStatistic(int statisticid, sbyte amount)
+            {
+                this._StatisticId = statisticid;
+                this._Amount = amount;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_StatisticId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Amount), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static IncrementStatistic Deserialize(Stream stream)
+            {
+                int statisticid = Protocol.ReadInt(stream);
+                sbyte amount = Protocol.ReadByte(stream);
+                return new IncrementStatistic(statisticid, amount);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Statistic ID: " + _StatisticId);
+                Console.WriteLine("  Amount: " + _Amount);
             }
         }
         public class DisconnectKick : Packet //0xFF
