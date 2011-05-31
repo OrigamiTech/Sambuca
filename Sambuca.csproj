@@ -43,6 +43,7 @@
     <Compile Include="About.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="Connection_Callbacks.cs" />
+    <Compile Include="Core.cs" />
     <Compile Include="Packets.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Protocol.cs" />

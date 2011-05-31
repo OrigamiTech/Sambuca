@@ -15,104 +15,83 @@ namespace Sambuca
                 b2[b2.Length - 1 - i] = b[i];
             return b2;
         }
-
-        public static sbyte ReadByte(byte[] b)
+        private static bool BitPatternMatch(byte b, string pattern)
         {
-            return (sbyte)b[0];
+            if(pattern.Length != 8)
+                return false;
+            string input = Convert.ToString(b, 2).PadLeft(8, '0');
+            for(int i = 0; i < 8; i++)
+                if(input[i] != pattern[i] && pattern[i] != 'x')
+                    return false;
+            return true;
         }
-        public static sbyte ReadByte(Stream stream)
+
+
+        public static byte ReadByte(Stream stream)
+        {
+            return (byte)stream.ReadByte();
+        }
+        public static sbyte ReadSbyte(Stream stream)
         {
             return (sbyte)stream.ReadByte();
-        }
-        public static short ReadShort(byte[] b)
-        {
-            if(BitConverter.IsLittleEndian)
-                return BitConverter.ToInt16(ReverseByteArray(b), 0);
-            return BitConverter.ToInt16(b, 0);
         }
         public static short ReadShort(Stream stream)
         {
             byte[] b = new byte[sizeof(short)];
             for(int i = 0; i < sizeof(short); i++)
                 b[i] = (byte)stream.ReadByte();
-            return ReadShort(b);
-        }
-        public static int ReadInt(byte[] b)
-        {
             if(BitConverter.IsLittleEndian)
-                return BitConverter.ToInt32(ReverseByteArray(b), 0);
-            return BitConverter.ToInt32(b, 0);
+                return BitConverter.ToInt16(ReverseByteArray(b), 0);
+            return BitConverter.ToInt16(b, 0);
         }
         public static int ReadInt(Stream stream)
         {
             byte[] b = new byte[sizeof(int)];
             for(int i = 0; i < sizeof(int); i++)
                 b[i] = (byte)stream.ReadByte();
-            return ReadInt(b);
-        }
-        public static long ReadLong(byte[] b)
-        {
             if(BitConverter.IsLittleEndian)
-                return BitConverter.ToInt64(ReverseByteArray(b), 0);
-            return BitConverter.ToInt64(b, 0);
+                return BitConverter.ToInt32(ReverseByteArray(b), 0);
+            return BitConverter.ToInt32(b, 0);
         }
         public static long ReadLong(Stream stream)
         {
             byte[] b = new byte[sizeof(long)];
             for(int i = 0; i < sizeof(long); i++)
                 b[i] = (byte)stream.ReadByte();
-            return ReadLong(b);
-        }
-        public static double ReadDouble(byte[] b)
-        {
             if(BitConverter.IsLittleEndian)
-                return BitConverter.ToDouble(ReverseByteArray(b), 0);
-            return BitConverter.ToDouble(b, 0);
+                return BitConverter.ToInt64(ReverseByteArray(b), 0);
+            return BitConverter.ToInt64(b, 0);
         }
         public static double ReadDouble(Stream stream)
         {
             byte[] b = new byte[sizeof(long)];
             for(int i = 0; i < sizeof(long); i++)
                 b[i] = (byte)stream.ReadByte();
-            return ReadDouble(b);
-        }
-        public static float ReadFloat(byte[] b)
-        {
             if(BitConverter.IsLittleEndian)
-                return BitConverter.ToSingle(ReverseByteArray(b), 0);
-            return BitConverter.ToSingle(b, 0);
+                return BitConverter.ToDouble(ReverseByteArray(b), 0);
+            return BitConverter.ToDouble(b, 0);
         }
         public static float ReadFloat(Stream stream)
         {
             byte[] b = new byte[sizeof(float)];
             for(int i = 0; i < sizeof(float); i++)
                 b[i] = (byte)stream.ReadByte();
-            return ReadFloat(b);
-        }
-        public static bool ReadBool(byte[] b)
-        {
-            return b[0] == 0x01;
+            if(BitConverter.IsLittleEndian)
+                return BitConverter.ToSingle(ReverseByteArray(b), 0);
+            return BitConverter.ToSingle(b, 0);
         }
         public static bool ReadBool(Stream stream)
         {
-            return ReadBool(new byte[] { (byte)stream.ReadByte() });
-        }
-        public static string ReadString16(byte[] b)
-        {
-            string s = "";
-            for(int i = 0; i < b.Length / 2; i++)
-                s += (char)ReadShort(new byte[2] { b[i * 2], b[i * 2 + 1] });
-            return s;
+            return ((byte)stream.ReadByte() & 0x01) == 0x01;
         }
         public static string ReadString16(Stream stream)
         {
             short len = ReadShort(stream);
-            byte[] b = new byte[len * sizeof(short)];
-            for(int i = 0; i < b.Length; i++)
-                b[i] = (byte)ReadByte(stream);
-            return ReadString16(b);
+            string s = "";
+            for(int i = 0; i < len; i++)
+                s += (char)ReadShort(stream);
+            return s;
         }
-
         public static string ReadString8(Stream stream)
         {
             short len = ReadShort(stream);
@@ -143,182 +122,121 @@ namespace Sambuca
             }
             return s;
         }
-
-        private static bool BitPatternMatch(byte b, string pattern)
-        {
-            if(pattern.Length!=8)
-                return false;
-            string input = Convert.ToString(b, 2).PadLeft(8, '0');
-            for(int i = 0; i < 8; i++)
-                if(input[i] != pattern[i] && pattern[i] != 'x')
-                    return false;
-            return true;
-        }
-
         public static byte[] ReadMetadata(Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
-            /*
-              let x = 0 of type byte
-                 while (x = read byte from stream) does not equal 127:
-                     select based on value of (x >> 5):
-                         case 0: read byte from stream
-                         case 1: read short from stream
-                         case 2: read int from stream
-                         case 3: read float from stream
-                         case 4: read string from stream
-                         case 5: read short, byte, short from stream; save as item stack (id, count, damage, respectively)
-                         case 6: read int, int, int from stream; save as extra entity information.
-                     end select
-                 end while
-             */
-            byte field_type;
-            while((field_type = (byte)stream.ReadByte()) != 127)
+            using(MemoryStream ms = new MemoryStream())
             {
-                ms.WriteByte(field_type);
-                switch(field_type >> 5)
+                byte field_type;
+                while((field_type = (byte)stream.ReadByte()) != 127)
                 {
-                    case 0:
-                        ms.Write(Protocol.WriteByte(Protocol.ReadByte(stream)), 0, sizeof(sbyte));
-                        break;
-                    case 1:
-                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
-                        break;
-                    case 2:
-                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
-                        break;
-                    case 3:
-                        ms.Write(Protocol.WriteFloat(Protocol.ReadFloat(stream)), 0, sizeof(float));
-                        break;
-                    case 4:
-                        byte[] b_string = Protocol.WriteString16(Protocol.ReadString16(stream));
-                        ms.Write(b_string, 0, b_string.Length);
-                        break;
-                    case 5:
-                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
-                        ms.Write(Protocol.WriteByte(Protocol.ReadByte(stream)), 0, sizeof(sbyte));
-                        ms.Write(Protocol.WriteShort(Protocol.ReadShort(stream)), 0, sizeof(short));
-                        break;
-                    case 6:
-                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
-                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
-                        ms.Write(Protocol.WriteInt(Protocol.ReadInt(stream)), 0, sizeof(int));
-                        break;
+                    ms.WriteByte(field_type);
+                    switch(field_type >> 5)
+                    {
+                        case 0:
+                            Protocol.WriteByte(Protocol.ReadByte(stream), ms);
+                            break;
+                        case 1:
+                            Protocol.WriteShort(Protocol.ReadShort(stream), ms);
+                            break;
+                        case 2:
+                            Protocol.WriteInt(Protocol.ReadInt(stream), ms);
+                            break;
+                        case 3:
+                            Protocol.WriteFloat(Protocol.ReadFloat(stream), ms);
+                            break;
+                        case 4:
+                            Protocol.WriteString16(Protocol.ReadString16(stream), ms);
+                            break;
+                        case 5:
+                            Protocol.WriteShort(Protocol.ReadShort(stream), ms);
+                            Protocol.WriteByte(Protocol.ReadByte(stream), ms);
+                            Protocol.WriteShort(Protocol.ReadShort(stream), ms);
+                            break;
+                        case 6:
+                            Protocol.WriteInt(Protocol.ReadInt(stream), ms);
+                            Protocol.WriteInt(Protocol.ReadInt(stream), ms);
+                            Protocol.WriteInt(Protocol.ReadInt(stream), ms);
+                            break;
+                    }
                 }
+                return ms.GetBuffer();
             }
-            return ms.GetBuffer();
         }
 
 
 
-        public static byte[] WriteByte(byte b)
+        public static void WriteByte(byte b, Stream stream)
         {
-            return new byte[] { b };
+            stream.WriteByte(b);
         }
-        public static byte[] WriteByte(sbyte b)
+        public static void WriteSbyte(sbyte b, Stream stream)
         {
-            return new byte[] { (byte)b };
+            stream.WriteByte((byte)b);
         }
-        public static byte[] WriteShort(short s)
+        public static void WriteShort(short s, Stream stream)
         {
             if(BitConverter.IsLittleEndian)
-                return ReverseByteArray(BitConverter.GetBytes(s));
-            return BitConverter.GetBytes(s);
+                stream.Write(ReverseByteArray(BitConverter.GetBytes(s)), 0, sizeof(short));
+            stream.Write(BitConverter.GetBytes(s), 0, sizeof(short));
         }
-        public static byte[] WriteInt(int i)
+        public static void WriteInt(int i, Stream stream)
         {
             if(BitConverter.IsLittleEndian)
-                return ReverseByteArray(BitConverter.GetBytes(i));
-            return BitConverter.GetBytes(i);
+                stream.Write(ReverseByteArray(BitConverter.GetBytes(i)), 0, sizeof(int));
+            stream.Write(BitConverter.GetBytes(i), 0, sizeof(int));
         }
-        public static byte[] WriteLong(long l)
+        public static void WriteLong(long l, Stream stream)
         {
             if(BitConverter.IsLittleEndian)
-                return ReverseByteArray(BitConverter.GetBytes(l));
-            return BitConverter.GetBytes(l);
+                stream.Write(ReverseByteArray(BitConverter.GetBytes(l)), 0, sizeof(long));
+            stream.Write(BitConverter.GetBytes(l), 0, sizeof(long));
         }
-        public static byte[] WriteDouble(double d)
+        public static void WriteDouble(double d, Stream stream)
         {
             if(BitConverter.IsLittleEndian)
-                return ReverseByteArray(BitConverter.GetBytes(d));
-            return BitConverter.GetBytes(d);
+                stream.Write(ReverseByteArray(BitConverter.GetBytes(d)), 0, sizeof(double));
+            stream.Write(BitConverter.GetBytes(d), 0, sizeof(double));
         }
-        public static byte[] WriteFloat(float f)
+        public static void WriteFloat(float f, Stream stream)
         {
             if(BitConverter.IsLittleEndian)
-                return ReverseByteArray(BitConverter.GetBytes(f));
-            return BitConverter.GetBytes(f);
+                stream.Write(ReverseByteArray(BitConverter.GetBytes(f)), 0, sizeof(float));
+            stream.Write(BitConverter.GetBytes(f), 0, sizeof(float));
         }
-        public static byte[] WriteBool(bool b)
+        public static void WriteBool(bool b, Stream stream)
         {
-            return new byte[] { (byte)(b ? 0x01 : 0x00) };
+            stream.WriteByte((byte)(b ? 0x01 : 0x00));
         }
-        public static byte[] WriteString16(string s)
+        public static void WriteString16(string s, Stream stream)
         {
-            /*byte[] data = new byte[s.Length * 2 + sizeof(short)];
-            byte[] len = Protocol.WriteShort((short)s.Length);
-            for(int i=0;i<sizeof(short);i++)
-                data[i] = len[i];
-            for(int i = 0; i < s.Length; i++)
-            {
-                byte[] b = WriteShort((short)s[i]);
-                data[i * 2 + sizeof(short)] = b[0];
-                data[i * 2 + sizeof(short) + 1] = b[1];
-            }
-            return data;*/
-            MemoryStream data = new MemoryStream();
-            data.Write(Protocol.WriteShort((short)(s.Length)), 0, sizeof(short));
+            Protocol.WriteShort((short)(s.Length), stream);
             for(int i = 0; i < s.Length; i++)
             {
                 ushort char_ = (ushort)s[i];
-                data.WriteByte((byte)(char_ >> 8));
-                data.WriteByte((byte)(char_ & 0xFF));
+                stream.WriteByte((byte)(char_ >> 8));
+                stream.WriteByte((byte)(char_ & 0xFF));
             }
-            return data.GetBuffer();
         }
-        public static byte[] WriteString8(string s)
+        public static void WriteString8(string s, Stream stream)
         {
-            MemoryStream data = new MemoryStream();
-            data.Write(Protocol.WriteShort((short)(s.Length)), 0, sizeof(short));
+            Protocol.WriteShort((short)(s.Length), stream);
             for(int i = 0; i < s.Length; i++)
             {
                 ushort c = (ushort)s[i];
                 if(c >= 0x0001 && c <= 0x007F)
-                    data.WriteByte((byte)(c & 0x007F));
+                    stream.WriteByte((byte)(c & 0x007F));
                 else if(c == 0x0000 || (c >= 0x0080 && c <= 0x07FF))
                 {
-                    data.WriteByte((byte)(0xC0 | (c >> 11)));
-                    data.WriteByte((byte)(0x80 | (c & 0x003F)));
+                    stream.WriteByte((byte)(0xC0 | (c >> 11)));
+                    stream.WriteByte((byte)(0x80 | (c & 0x003F)));
                 }
                 else if(c >= 0x0800 && c <= 0xFFFF)
                 {
-                    data.WriteByte((byte)(0xE0 | (c >> 12)));
-                    data.WriteByte((byte)(0x80 | ((c >> 6) & 0x003F)));
-                    data.WriteByte((byte)(0x80 | (c & 0x003F)));
+                    stream.WriteByte((byte)(0xE0 | (c >> 12)));
+                    stream.WriteByte((byte)(0x80 | ((c >> 6) & 0x003F)));
+                    stream.WriteByte((byte)(0x80 | (c & 0x003F)));
                 }
             }
-            return data.GetBuffer();
         }
-
-
-
-        public static ConsoleColor[] ChatColors = new ConsoleColor[]{
-            ConsoleColor.Black,
-            ConsoleColor.DarkBlue,
-            ConsoleColor.DarkGreen,
-            ConsoleColor.DarkCyan,
-            ConsoleColor.DarkRed,
-            ConsoleColor.DarkMagenta,
-            ConsoleColor.DarkYellow,
-            ConsoleColor.Gray,
-            ConsoleColor.DarkGray,
-            ConsoleColor.Blue,
-            ConsoleColor.Green,
-            ConsoleColor.Cyan,
-            ConsoleColor.Red,
-            ConsoleColor.Magenta,
-            ConsoleColor.Yellow,
-            ConsoleColor.White
-        };
     }
 }
