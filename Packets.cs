@@ -54,14 +54,14 @@ namespace Sambuca
             PlayNoteBlock = 0x36,           //
             Explosion = 0x3C,               //
             NewInvalidState = 0x46,         //
-            Weather = 0x47,
-            OpenWindow = 0x64,
-            CloseWindow = 0x65,
-            WindowClick = 0x66,
+            Thunderbolt = 0x47,             //
+            OpenWindow = 0x64,              //
+            CloseWindow = 0x65,             //
+            WindowClick = 0x66,             // LAST
             SetSlot = 0x67,                 //
             WindowItems = 0x68,             //
-            UpdateProgressBar = 0x69,
-            Transaction = 0x6A,
+            UpdateProgressBar = 0x69,       //
+            Transaction = 0x6A,             //
             UpdateSign = 0x82,              //
             IncrementStatistic = 0xC8,      //
             DisconnectKick = 0xFF,          //
@@ -160,10 +160,22 @@ namespace Sambuca
                     return Explosion.Deserialize(stream);               //0x3C
                 case PacketId.NewInvalidState:
                     return NewInvalidState.Deserialize(stream);         //0x46
+                case PacketId.Thunderbolt:
+                    return Thunderbolt.Deserialize(stream);             //0x47
+                case PacketId.OpenWindow:
+                    return OpenWindow.Deserialize(stream);              //0x64
+                case PacketId.CloseWindow:
+                    return CloseWindow.Deserialize(stream);             //0x65
+                case PacketId.WindowClick:
+                    return WindowClick.Deserialize(stream);             //0x66
                 case PacketId.SetSlot:
                     return SetSlot.Deserialize(stream);                 //0x67
                 case PacketId.WindowItems:
                     return WindowItems.Deserialize(stream);             //0x68
+                case PacketId.UpdateProgressBar:
+                    return UpdateProgressBar.Deserialize(stream);       //0x69
+                case PacketId.Transaction:
+                    return Transaction.Deserialize(stream);             //0x6A
                 case PacketId.UpdateSign:
                     return UpdateSign.Deserialize(stream);              //0x82
                 case PacketId.IncrementStatistic:
@@ -414,6 +426,7 @@ namespace Sambuca
             }
             public static void PrintMessage(string message)
             {
+                ConsoleColor initialForegroundColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.White;
                 for(int i = 0; i < message.Length; i++)
                     if((short)message[i] == 0x00A7)
@@ -421,6 +434,7 @@ namespace Sambuca
                     else
                         Console.Write(message[i]);
                 Console.WriteLine();
+                Console.ForegroundColor = initialForegroundColor;
             }
 
             private string _Message;
@@ -2495,6 +2509,213 @@ namespace Sambuca
                 Console.WriteLine(_Reason == 0 ? " - Invalid Bed" : (_Reason == 1 ? " - Begin raining" : (_Reason == 2 ? " - End raining" : "")));
             }
         }
+        public class Thunderbolt : Packet //0x47
+        {
+            private const PacketId PACKET_ID = PacketId.Thunderbolt;
+
+            private int _EntityId, _X, _Y, _Z;
+            private bool _Unknown;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public bool Unknown { get { return _Unknown; } set { _Unknown = value; } }
+            public int X { get { return _X; } set { _X = value; } }
+            public int Y { get { return _Y; } set { _Y = value; } }
+            public int Z { get { return _Z; } set { _Z = value; } }
+            public Thunderbolt(int entityid, bool unknown, int x,int y, int z)
+            {
+                this._EntityId = entityid;
+                this._Unknown = unknown;
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteBool(_Unknown), 0, 1);
+                        ms.Write(Protocol.WriteInt(_X), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Y), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_Z), 0, sizeof(int));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static Thunderbolt Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                bool unknown = Protocol.ReadBool(stream);
+                int x = Protocol.ReadInt(stream);
+                int y = Protocol.ReadInt(stream);
+                int z = Protocol.ReadInt(stream);
+                return new Thunderbolt(entityid, unknown, x, y, z);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  Unknown: " + _Unknown);
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+            }
+        }
+        public class OpenWindow : Packet //0x64
+        {
+            private const PacketId PACKET_ID = PacketId.OpenWindow;
+
+            private sbyte _WindowId, _InventoryType, _SlotCount;
+            private string _WindowTitle;
+            public sbyte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public sbyte InventoryType { get { return _InventoryType; } set { _InventoryType = value; } }
+            public string WindowTitle { get { return _WindowTitle; } set { _WindowTitle = value; } }
+            public sbyte SlotCount { get { return _SlotCount; } set { _SlotCount = value; } }
+            public OpenWindow(sbyte windowid, sbyte inventorytype, string windowtitle, sbyte slotcount)
+            {
+                this._WindowId = windowid;
+                this._InventoryType = inventorytype;
+                this._WindowTitle = windowtitle;
+                this._SlotCount = slotcount;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        byte[] b_windowtitle = Protocol.WriteString8(_WindowTitle);
+                        ms.Write(b_windowtitle, 0, b_windowtitle.Length);
+                        ms.Write(Protocol.WriteByte(_SlotCount), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static OpenWindow Deserialize(Stream stream)
+            {
+                sbyte windowid = Protocol.ReadByte(stream);
+                sbyte inventorytype = Protocol.ReadByte(stream);
+                string windowtitle = Protocol.ReadString8(stream);
+                sbyte slotcount = Protocol.ReadByte(stream);
+                return new OpenWindow(windowid, inventorytype, windowtitle, slotcount);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Window ID: " + _WindowId);
+                Console.WriteLine("  Inventory Type: " + _InventoryType);
+                Console.WriteLine("  Window Title: " + _WindowTitle);
+                Console.WriteLine("  Slot Count: " + _SlotCount);
+            }
+        }
+        public class CloseWindow : Packet //0x65
+        {
+            private const PacketId PACKET_ID = PacketId.CloseWindow;
+
+            private sbyte _WindowId;
+            public sbyte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public CloseWindow(sbyte windowid)
+            {
+                this._WindowId = windowid;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static CloseWindow Deserialize(Stream stream)
+            {
+                sbyte windowid = Protocol.ReadByte(stream);
+                return new CloseWindow(windowid);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  WindowId: " + _WindowId);
+            }
+        }
+        public class WindowClick : Packet //0x65
+        {
+            private const PacketId PACKET_ID = PacketId.WindowClick;
+
+            private sbyte _WindowId, _RightClick, _ItemCount;
+            private short _Slot, _ActionNumber, _ItemId, _ItemUses;
+            private bool _Shift;
+            public sbyte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public short Slot { get { return _Slot; } set { _Slot = value; } }
+            public sbyte RightClick { get { return _RightClick; } set { _RightClick = value; } }
+            public short ActionNumber { get { return _ActionNumber; } set { ActionNumber = value; } }
+            public bool Shift { get { return _Shift; } set { _Shift = value; } }
+            public short ItemId { get { return _ItemId; } set { _ItemId = value; } }
+            public sbyte ItemCount { get { return _ItemCount; } set { _ItemCount = value; } }
+            public short ItemUses { get { return _ItemUses; } set { _ItemUses = value; } }
+            public WindowClick(sbyte windowid,short slot, sbyte rightclick, short actionnumber, bool shift, short itemid, sbyte itemcount, short itemuses)
+            {
+                this._WindowId = windowid;
+                this._Slot = slot;
+                this._RightClick = rightclick;
+                this._ActionNumber = actionnumber;
+                this._Shift = shift;
+                this._ItemId = itemid;
+                this._ItemCount = itemcount;
+                this._ItemUses = itemuses;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_Slot), 0, sizeof(short));
+                        ms.Write(Protocol.WriteByte(_RightClick), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_ActionNumber), 0, sizeof(short));
+                        ms.Write(Protocol.WriteBool(_Shift), 0, 1);
+                        ms.Write(Protocol.WriteShort(_ItemId), 0, sizeof(short));
+                        ms.Write(Protocol.WriteByte(_ItemCount), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_ItemUses), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static WindowClick Deserialize(Stream stream)
+            {
+                sbyte windowid = Protocol.ReadByte(stream);
+                short slot = Protocol.ReadShort(stream);
+                sbyte rightclick = Protocol.ReadByte(stream);
+                short actionnumber = Protocol.ReadShort(stream);
+                bool shift = Protocol.ReadBool(stream);
+                short itemid = Protocol.ReadShort(stream);
+                sbyte itemcount = Protocol.ReadByte(stream);
+                short itemuses = Protocol.ReadShort(stream);
+                return new WindowClick(windowid, slot, rightclick, actionnumber, shift, itemid, itemcount, itemuses);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Window ID: " + _WindowId);
+                Console.WriteLine("  Slot: " + _Slot);
+                Console.WriteLine("  RightClick: " + _RightClick);
+                Console.WriteLine("  Action Number: " + _ActionNumber);
+                Console.WriteLine("  Shift: " + _Shift);
+                Console.WriteLine("  Item ID: " + _ItemId);
+                Console.WriteLine("  Item Count: " + _ItemCount);
+                Console.WriteLine("  Item Uses: " + _ItemUses);
+            }
+        }
         public class SetSlot : Packet //0x67
         {
             private const PacketId PACKET_ID = PacketId.SetSlot;
@@ -2614,6 +2835,96 @@ namespace Sambuca
                 for(int i = 0; i < _Payload.Length; i++)
                     Console.Write(_Payload[i].ToString("X2"));
                 Console.WriteLine();
+            }
+        }
+        public class UpdateProgressBar : Packet //0x69
+        {
+            private const PacketId PACKET_ID = PacketId.UpdateProgressBar;
+
+            private sbyte _WindowId;
+            private short _ProgressBarId, _Value;
+            public sbyte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public short ProgressBarId { get { return _ProgressBarId; } set { _ProgressBarId = value; } }
+            public short Value { get { return _Value; } set { _Value = value; } }
+            public UpdateProgressBar(sbyte windowid, short progressbarid, short value)
+            {
+                this._WindowId = windowid;
+                this._ProgressBarId = progressbarid;
+                this._Value = value;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_ProgressBarId), 0, sizeof(short));
+                        ms.Write(Protocol.WriteShort(_Value), 0, sizeof(short));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static UpdateProgressBar Deserialize(Stream stream)
+            {
+                sbyte windowid = Protocol.ReadByte(stream);
+                short count = Protocol.ReadShort(stream);
+                short payload = Protocol.ReadShort(stream);
+                return new UpdateProgressBar(windowid, count, payload);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Window ID: " + _WindowId);
+                Console.WriteLine("  Progress Bar ID: " + _ProgressBarId);
+                Console.WriteLine("  Value: " + _Value);
+                Console.WriteLine();
+            }
+        }
+        public class Transaction : Packet //0x6A
+        {
+            private const PacketId PACKET_ID = PacketId.Transaction;
+
+            private sbyte _WindowId;
+            private short _ActionId;
+            private bool _Accepted;
+            public sbyte WindowId { get { return _WindowId; } set { _WindowId = value; } }
+            public short Slot { get { return _ActionId; } set { _ActionId = value; } }
+            public bool Accepted { get { return _Accepted; } set { _Accepted = value; } }
+            public Transaction(sbyte windowid, short actionid, bool accepted)
+            {
+                this._WindowId = windowid;
+                this._ActionId = actionid;
+                this._Accepted = accepted;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteByte(_WindowId), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteShort(_ActionId), 0, sizeof(short));
+                        ms.Write(Protocol.WriteBool(_Accepted), 0, 1);
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static Transaction Deserialize(Stream stream)
+            {
+                sbyte windowid = Protocol.ReadByte(stream);
+                short actionid= Protocol.ReadShort(stream);
+                bool accepted = Protocol.ReadBool(stream);
+                return new Transaction(windowid, actionid, accepted);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Window ID: " + _WindowId);
+                Console.WriteLine("  Action ID: " + _ActionId);
+                Console.WriteLine("  Accepted: " + _Accepted);
             }
         }
         public class UpdateSign : Packet //0x82

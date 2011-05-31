@@ -51,8 +51,14 @@ namespace Sambuca
         public event EH_Packet_PlayNoteBlock PlayNoteBlock;
         public event EH_Packet_Explosion Explosion;
         public event EH_Packet_NewInvalidState NewInvalidState;
+        public event EH_Packet_Thunderbolt Thunderbolt;
+        public event EH_Packet_OpenWindow OpenWindow;
+        public event EH_Packet_CloseWindow CloseWindow;
+        public event EH_Packet_WindowClick WindowClick;
         public event EH_Packet_SetSlot SetSlot;
         public event EH_Packet_WindowItems WindowItems;
+        public event EH_Packet_UpdateProgressBar UpdateProgressBar;
+        public event EH_Packet_Transaction Transaction;
         public event EH_Packet_UpdateSign UpdateSign;
         public event EH_Packet_IncrementStatistic IncrementStatistic;
         public event EH_Packet_DisconnectKick DisconnectKick;
@@ -100,8 +106,14 @@ namespace Sambuca
         public delegate void EH_Packet_PlayNoteBlock(object sender, Packets.PlayNoteBlock e);
         public delegate void EH_Packet_Explosion(object sender, Packets.Explosion e);
         public delegate void EH_Packet_NewInvalidState(object sender, Packets.NewInvalidState e);
+        public delegate void EH_Packet_Thunderbolt(object sender, Packets.Thunderbolt e);
+        public delegate void EH_Packet_OpenWindow(object sender, Packets.OpenWindow e);
+        public delegate void EH_Packet_CloseWindow(object sender, Packets.CloseWindow e);
+        public delegate void EH_Packet_WindowClick(object sender, Packets.WindowClick e);
         public delegate void EH_Packet_SetSlot(object sender, Packets.SetSlot e);
         public delegate void EH_Packet_WindowItems(object sender, Packets.WindowItems e);
+        public delegate void EH_Packet_UpdateProgressBar(object sender, Packets.UpdateProgressBar e);
+        public delegate void EH_Packet_Transaction(object sender, Packets.Transaction e);
         public delegate void EH_Packet_UpdateSign(object sender, Packets.UpdateSign e);
         public delegate void EH_Packet_IncrementStatistic(object sender, Packets.IncrementStatistic e);
         public delegate void EH_Packet_DisconnectKick(object sender, Packets.DisconnectKick e);
@@ -149,8 +161,14 @@ namespace Sambuca
         protected virtual void OnPacket_PlayNoteBlock(Packets.PlayNoteBlock e) { if(PlayNoteBlock != null)PlayNoteBlock(this, e); }
         protected virtual void OnPacket_Explosion(Packets.Explosion e) { if(Explosion != null)Explosion(this, e); }
         protected virtual void OnPacket_NewInvalidState(Packets.NewInvalidState e) { if(NewInvalidState != null)NewInvalidState(this, e); }
+        protected virtual void OnPacket_Thunderbolt(Packets.Thunderbolt e) { if(Thunderbolt != null)Thunderbolt(this, e); }
+        protected virtual void OnPacket_OpenWindow(Packets.OpenWindow e) { if(OpenWindow != null)OpenWindow(this, e); }
+        protected virtual void OnPacket_CloseWindow(Packets.CloseWindow e) { if(CloseWindow != null)CloseWindow(this, e); }
+        protected virtual void OnPacket_WindowClick(Packets.WindowClick e) { if(WindowClick != null)WindowClick(this, e); }
         protected virtual void OnPacket_SetSlot(Packets.SetSlot e) { if(SetSlot != null)SetSlot(this, e); }
         protected virtual void OnPacket_WindowItems(Packets.WindowItems e) { if(WindowItems != null)WindowItems(this, e); }
+        protected virtual void OnPacket_UpdateProgressBar(Packets.UpdateProgressBar e) { if(UpdateProgressBar != null)UpdateProgressBar(this, e); }
+        protected virtual void OnPacket_Transaction(Packets.Transaction e) { if(Transaction != null)Transaction(this, e); }
         protected virtual void OnPacket_UpdateSign(Packets.UpdateSign e) { if(UpdateSign != null)UpdateSign(this, e); }
         protected virtual void OnPacket_IncrementStatistic(Packets.IncrementStatistic e) { if(IncrementStatistic != null)IncrementStatistic(this, e); }
         protected virtual void OnPacket_DisconnectKick(Packets.DisconnectKick e) { if(DisconnectKick != null)DisconnectKick(this, e); }

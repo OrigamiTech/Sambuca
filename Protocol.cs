@@ -15,6 +15,7 @@ namespace Sambuca
                 b2[b2.Length - 1 - i] = b[i];
             return b2;
         }
+
         public static sbyte ReadByte(byte[] b)
         {
             return (sbyte)b[0];
@@ -111,6 +112,49 @@ namespace Sambuca
                 b[i] = (byte)ReadByte(stream);
             return ReadString16(b);
         }
+
+        public static string ReadString8(Stream stream)
+        {
+            short len = ReadShort(stream);
+            string s = "";
+            for(int i = 0; i < len; i++)
+            {
+                byte b1 = (byte)ReadByte(stream);
+                if(BitPatternMatch(b1,"0xxxxxxx"))
+                    s += (char)(b1 & 0x7F);
+                else if(BitPatternMatch(b1, "110xxxxx"))
+                {
+                    byte b2 = (byte)ReadByte(stream);
+                    ushort c = 0;
+                    c |= (ushort)(((ushort)(b2)) & 0x3F);
+                    c |= (ushort)((((ushort)(b1)) & 0x1F) << 6);
+                    s += c;
+                }
+                else if(BitPatternMatch(b1, "1110xxxx"))
+                {
+                    byte b2 = (byte)ReadByte(stream);
+                    byte b3 = (byte)ReadByte(stream);
+                    ushort c = 0;
+                    c |= (ushort)(((ushort)(b3)) & 0x3F);
+                    c |= (ushort)((((ushort)(b2)) & 0x3F) << 6);
+                    c |= (ushort)((((ushort)(b1)) & 0x0F) << 12);
+                    s += c;
+                }
+            }
+            return s;
+        }
+
+        private static bool BitPatternMatch(byte b, string pattern)
+        {
+            if(pattern.Length!=8)
+                return false;
+            string input = Convert.ToString(b, 2).PadLeft(8, '0');
+            for(int i = 0; i < 8; i++)
+                if(input[i] != pattern[i] && pattern[i] != 'x')
+                    return false;
+            return true;
+        }
+
         public static byte[] ReadMetadata(Stream stream)
         {
             MemoryStream ms = new MemoryStream();
@@ -229,6 +273,29 @@ namespace Sambuca
                 ushort char_ = (ushort)s[i];
                 data.WriteByte((byte)(char_ >> 8));
                 data.WriteByte((byte)(char_ & 0xFF));
+            }
+            return data.GetBuffer();
+        }
+        public static byte[] WriteString8(string s)
+        {
+            MemoryStream data = new MemoryStream();
+            data.Write(Protocol.WriteShort((short)(s.Length)), 0, sizeof(short));
+            for(int i = 0; i < s.Length; i++)
+            {
+                ushort c = (ushort)s[i];
+                if(c >= 0x0001 && c <= 0x007F)
+                    data.WriteByte((byte)(c & 0x007F));
+                else if(c == 0x0000 || (c >= 0x0080 && c <= 0x07FF))
+                {
+                    data.WriteByte((byte)(0xC0 | (c >> 11)));
+                    data.WriteByte((byte)(0x80 | (c & 0x003F)));
+                }
+                else if(c >= 0x0800 && c <= 0xFFFF)
+                {
+                    data.WriteByte((byte)(0xE0 | (c >> 12)));
+                    data.WriteByte((byte)(0x80 | ((c >> 6) & 0x003F)));
+                    data.WriteByte((byte)(0x80 | (c & 0x003F)));
+                }
             }
             return data.GetBuffer();
         }

@@ -219,11 +219,29 @@ namespace Sambuca
                         case Packets.PacketId.NewInvalidState:
                             OnPacket_NewInvalidState((Packets.NewInvalidState)packet);
                             break;
+                        case Packets.PacketId.Thunderbolt:
+                            OnPacket_Thunderbolt((Packets.Thunderbolt)packet);
+                            break;
+                        case Packets.PacketId.OpenWindow:
+                            OnPacket_OpenWindow((Packets.OpenWindow)packet);
+                            break;
+                        case Packets.PacketId.CloseWindow:
+                            OnPacket_CloseWindow((Packets.CloseWindow)packet);
+                            break;
+                        case Packets.PacketId.WindowClick:
+                            OnPacket_WindowClick((Packets.WindowClick)packet);
+                            break;
                         case Packets.PacketId.SetSlot:
                             OnPacket_SetSlot((Packets.SetSlot)packet);
                             break;
                         case Packets.PacketId.WindowItems:
                             OnPacket_WindowItems((Packets.WindowItems)packet);
+                            break;
+                        case Packets.PacketId.UpdateProgressBar:
+                            OnPacket_UpdateProgressBar((Packets.UpdateProgressBar)packet);
+                            break;
+                        case Packets.PacketId.Transaction:
+                            OnPacket_Transaction((Packets.Transaction)packet);
                             break;
                         case Packets.PacketId.UpdateSign:
                             OnPacket_UpdateSign((Packets.UpdateSign)packet);
