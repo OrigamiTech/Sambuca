@@ -165,14 +165,23 @@ namespace Sambuca
                         case Packets.PacketId.EntityPainting:
                             OnPacket_EntityPainting((Packets.EntityPainting)packet);
                             break;
+                        case Packets.PacketId.UNKNOWN_1B:
+                            OnPacket_UNKNOWN_1B((Packets.UNKNOWN_1B)packet);
+                            break;
                         case Packets.PacketId.EntityVelocity:
                             OnPacket_EntityVelocity((Packets.EntityVelocity)packet);
                             break;
                         case Packets.PacketId.DestroyEntity:
                             OnPacket_DestroyEntity((Packets.DestroyEntity)packet);
                             break;
+                        case Packets.PacketId.Entity:
+                            OnPacket_Entity((Packets.Entity)packet);
+                            break;
                         case Packets.PacketId.EntityRelativeMove:
                             OnPacket_EntityRelativeMove((Packets.EntityRelativeMove)packet);
+                            break;
+                        case Packets.PacketId.EntityLook:
+                            OnPacket_EntityLook((Packets.EntityLook)packet);
                             break;
                         case  Packets.PacketId.EntityLookAndRelativeMove:
                             OnPacket_EntityLookAndRelativeMove((Packets.EntityLookAndRelativeMove)packet);
@@ -182,6 +191,9 @@ namespace Sambuca
                             break;
                         case Packets.PacketId.EntityStatus:
                             OnPacket_EntityStatus((Packets.EntityStatus)packet);
+                            break;
+                        case Packets.PacketId.AttachEntity:
+                            OnPacket_AttachEntity((Packets.AttachEntity)packet);
                             break;
                         case Packets.PacketId.EntityMetadata:
                             OnPacket_EntityMetadata((Packets.EntityMetadata)packet);
@@ -200,6 +212,9 @@ namespace Sambuca
                             break;
                         case Packets.PacketId.PlayNoteBlock:
                             OnPacket_PlayNoteBlock((Packets.PlayNoteBlock)packet);
+                            break;
+                        case Packets.PacketId.Explosion:
+                            OnPacket_Explosion((Packets.Explosion)packet);
                             break;
                         case Packets.PacketId.NewInvalidState:
                             OnPacket_NewInvalidState((Packets.NewInvalidState)packet);

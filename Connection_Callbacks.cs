@@ -33,18 +33,23 @@ namespace Sambuca
         public event EH_Packet_AddObjectVehicle AddObjectVehicle;
         public event EH_Packet_MobSpawn MobSpawn;
         public event EH_Packet_EntityPainting EntityPainting;
+        public event EH_Packet_UNKNOWN_1B UNKNOWN_1B;
         public event EH_Packet_EntityVelocity EntityVelocity;
         public event EH_Packet_DestroyEntity DestroyEntity;
+        public event EH_Packet_Entity Entity;
         public event EH_Packet_EntityRelativeMove EntityRelativeMove;
+        public event EH_Packet_EntityLook EntityLook;
         public event EH_Packet_EntityLookAndRelativeMove EntityLookAndRelativeMove;
         public event EH_Packet_EntityTeleport EntityTeleport;
         public event EH_Packet_EntityStatus EntityStatus;
+        public event EH_Packet_AttachEntity AttachEntity;
         public event EH_Packet_EntityMetadata EntityMetadata;
         public event EH_Packet_PreChunk PreChunk;
         public event EH_Packet_MapChunk MapChunk;
         public event EH_Packet_MultiBlockChange MultiBlockChange;
         public event EH_Packet_BlockChange BlockChange;
         public event EH_Packet_PlayNoteBlock PlayNoteBlock;
+        public event EH_Packet_Explosion Explosion;
         public event EH_Packet_NewInvalidState NewInvalidState;
         public event EH_Packet_SetSlot SetSlot;
         public event EH_Packet_WindowItems WindowItems;
@@ -77,18 +82,23 @@ namespace Sambuca
         public delegate void EH_Packet_PickupSpawn(object sender, Packets.PickupSpawn e);
         public delegate void EH_Packet_CollectItem(object sender, Packets.CollectItem e);
         public delegate void EH_Packet_EntityPainting(object sender, Packets.EntityPainting e);
+        public delegate void EH_Packet_UNKNOWN_1B(object sender, Packets.UNKNOWN_1B e);
         public delegate void EH_Packet_EntityVelocity(object sender, Packets.EntityVelocity e);
         public delegate void EH_Packet_DestroyEntity(object sender, Packets.DestroyEntity e);
+        public delegate void EH_Packet_Entity(object sender, Packets.Entity e);
         public delegate void EH_Packet_EntityRelativeMove(object sender, Packets.EntityRelativeMove e);
+        public delegate void EH_Packet_EntityLook(object sender, Packets.EntityLook e);
         public delegate void EH_Packet_EntityLookAndRelativeMove(object sender, Packets.EntityLookAndRelativeMove e);
         public delegate void EH_Packet_EntityTeleport(object sender, Packets.EntityTeleport e);
         public delegate void EH_Packet_EntityStatus(object sender, Packets.EntityStatus e);
+        public delegate void EH_Packet_AttachEntity(object sender, Packets.AttachEntity e);
         public delegate void EH_Packet_EntityMetadata(object sender, Packets.EntityMetadata e);
         public delegate void EH_Packet_PreChunk(object sender, Packets.PreChunk e);
         public delegate void EH_Packet_MapChunk(object sender, Packets.MapChunk e);
         public delegate void EH_Packet_MultiBlockChange(object sender, Packets.MultiBlockChange e);
         public delegate void EH_Packet_BlockChange(object sender, Packets.BlockChange e);
         public delegate void EH_Packet_PlayNoteBlock(object sender, Packets.PlayNoteBlock e);
+        public delegate void EH_Packet_Explosion(object sender, Packets.Explosion e);
         public delegate void EH_Packet_NewInvalidState(object sender, Packets.NewInvalidState e);
         public delegate void EH_Packet_SetSlot(object sender, Packets.SetSlot e);
         public delegate void EH_Packet_WindowItems(object sender, Packets.WindowItems e);
@@ -121,18 +131,23 @@ namespace Sambuca
         protected virtual void OnPacket_AddObjectVehicle(Packets.AddObjectVehicle e) { if(AddObjectVehicle != null)AddObjectVehicle(this, e); }
         protected virtual void OnPacket_MobSpawn(Packets.MobSpawn e) { if(MobSpawn != null)MobSpawn(this, e); }
         protected virtual void OnPacket_EntityPainting(Packets.EntityPainting e) { if(EntityPainting != null)EntityPainting(this, e); }
+        protected virtual void OnPacket_UNKNOWN_1B(Packets.UNKNOWN_1B e) { if(UNKNOWN_1B != null)UNKNOWN_1B(this, e); }
         protected virtual void OnPacket_EntityVelocity(Packets.EntityVelocity e) { if(EntityVelocity != null)EntityVelocity(this, e); }
         protected virtual void OnPacket_DestroyEntity(Packets.DestroyEntity e) { if(DestroyEntity != null)DestroyEntity(this, e); }
+        protected virtual void OnPacket_Entity(Packets.Entity e) { if(Entity != null)Entity(this, e); }
         protected virtual void OnPacket_EntityRelativeMove(Packets.EntityRelativeMove e) { if(EntityRelativeMove != null)EntityRelativeMove(this, e); }
+        protected virtual void OnPacket_EntityLook(Packets.EntityLook e) { if(EntityLook != null)EntityLook(this, e); }
         protected virtual void OnPacket_EntityLookAndRelativeMove(Packets.EntityLookAndRelativeMove e) { if(EntityLookAndRelativeMove != null)EntityLookAndRelativeMove(this, e); }
         protected virtual void OnPacket_EntityTeleport(Packets.EntityTeleport e) { if(EntityTeleport != null)EntityTeleport(this, e); }
         protected virtual void OnPacket_EntityStatus(Packets.EntityStatus e) { if(EntityStatus != null)EntityStatus(this, e); }
+        protected virtual void OnPacket_AttachEntity(Packets.AttachEntity e) { if(AttachEntity != null)AttachEntity(this, e); }
         protected virtual void OnPacket_EntityMetadata(Packets.EntityMetadata e) { if(EntityMetadata != null)EntityMetadata(this, e); }
         protected virtual void OnPacket_PreChunk(Packets.PreChunk e) { if(PreChunk != null)PreChunk(this, e); }
         protected virtual void OnPacket_MapChunk(Packets.MapChunk e) { if(MapChunk != null)MapChunk(this, e); }
         protected virtual void OnPacket_MultiBlockChange(Packets.MultiBlockChange e) { if(MultiBlockChange != null)MultiBlockChange(this, e); }
         protected virtual void OnPacket_BlockChange(Packets.BlockChange e) { if(BlockChange != null)BlockChange(this, e); }
         protected virtual void OnPacket_PlayNoteBlock(Packets.PlayNoteBlock e) { if(PlayNoteBlock != null)PlayNoteBlock(this, e); }
+        protected virtual void OnPacket_Explosion(Packets.Explosion e) { if(Explosion != null)Explosion(this, e); }
         protected virtual void OnPacket_NewInvalidState(Packets.NewInvalidState e) { if(NewInvalidState != null)NewInvalidState(this, e); }
         protected virtual void OnPacket_SetSlot(Packets.SetSlot e) { if(SetSlot != null)SetSlot(this, e); }
         protected virtual void OnPacket_WindowItems(Packets.WindowItems e) { if(WindowItems != null)WindowItems(this, e); }

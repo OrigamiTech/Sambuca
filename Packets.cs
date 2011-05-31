@@ -36,23 +36,23 @@ namespace Sambuca
             AddObjectVehicle = 0x17,        //
             MobSpawn = 0x18,                //
             EntityPainting = 0x19,          //
-            UNKNOWN_1B = 0x1B,
+            UNKNOWN_1B = 0x1B,              //
             EntityVelocity = 0x1C,          //
             DestroyEntity = 0x1D,           //
-            Entity = 0x1E,
+            Entity = 0x1E,                  //
             EntityRelativeMove = 0x1F,      //
-            EntityLook = 0x20,
+            EntityLook = 0x20,              //
             EntityLookAndRelativeMove = 0x21,   //
             EntityTeleport = 0x22,          //
             EntityStatus = 0x26,            //
-            AttachEntity = 0x27,
+            AttachEntity = 0x27,            //
             EntityMetadata = 0x28,          //
             PreChunk = 0x32,                //
             MapChunk = 0x33,                //
             MultiBlockChange = 0x34,        //
             BlockChange = 0x35,             //
             PlayNoteBlock = 0x36,           //
-            Explosion = 0x3C,
+            Explosion = 0x3C,               //
             NewInvalidState = 0x46,         //
             Weather = 0x47,
             OpenWindow = 0x64,
@@ -124,18 +124,26 @@ namespace Sambuca
                     return MobSpawn.Deserialize(stream);                //0x18
                 case PacketId.EntityPainting:
                     return EntityPainting.Deserialize(stream);          //0x19
+                case PacketId.UNKNOWN_1B:
+                    return UNKNOWN_1B.Deserialize(stream);              //0x1B
                 case PacketId.EntityVelocity:
                     return EntityVelocity.Deserialize(stream);          //0x1C
                 case PacketId.DestroyEntity:
                     return DestroyEntity.Deserialize(stream);           //0x1D
+                case PacketId.Entity:
+                    return Entity.Deserialize(stream);                  //0x1E
                 case PacketId.EntityRelativeMove:
                     return EntityRelativeMove.Deserialize(stream);      //0x1F
+                case PacketId.EntityLook:
+                    return EntityLook.Deserialize(stream);              //0x20
                 case PacketId.EntityLookAndRelativeMove:
                     return EntityLookAndRelativeMove.Deserialize(stream);   //0x21
                 case PacketId.EntityTeleport:
                     return EntityTeleport.Deserialize(stream);          //0x22
                 case PacketId.EntityStatus:
                     return EntityStatus.Deserialize(stream);            //0x26
+                case PacketId.AttachEntity:
+                    return AttachEntity.Deserialize(stream);            //0x27
                 case PacketId.EntityMetadata:
                     return EntityMetadata.Deserialize(stream);          //0x28
                 case PacketId.PreChunk:
@@ -148,6 +156,8 @@ namespace Sambuca
                     return BlockChange.Deserialize(stream);             //0x35
                 case PacketId.PlayNoteBlock:
                     return PlayNoteBlock.Deserialize(stream);           //0x36
+                case PacketId.Explosion:
+                    return Explosion.Deserialize(stream);               //0x3C
                 case PacketId.NewInvalidState:
                     return NewInvalidState.Deserialize(stream);         //0x46
                 case PacketId.SetSlot:
@@ -1592,6 +1602,65 @@ namespace Sambuca
                 Console.WriteLine("  Direction: " + _Direction);
             }
         }
+        public class UNKNOWN_1B : Packet //0x1B
+        {
+            private const PacketId PACKET_ID = PacketId.UNKNOWN_1B;
+
+            private float _Unknown1, _Unknown2, _Unknown5, _Unknown6;
+            private bool _Unknown3, _Unknown4;
+            public float Unknown1 { get { return _Unknown1; } set { _Unknown1 = value; } }
+            public float Unknown2 { get { return _Unknown2; } set { _Unknown2 = value; } }
+            public bool Unknown3 { get { return _Unknown3; } set { _Unknown3 = value; } }
+            public bool Unknown4 { get { return _Unknown4; } set { _Unknown4 = value; } }
+            public float Unknown5 { get { return _Unknown5; } set { _Unknown5 = value; } }
+            public float Unknown6 { get { return _Unknown6; } set { _Unknown6 = value; } }
+            public UNKNOWN_1B(float unknown1, float unknown2, bool unknown3, bool unknown4, float unknown5, float unknown6)
+            {
+                this._Unknown1 = unknown1;
+                this._Unknown2 = unknown2;
+                this._Unknown3 = unknown3;
+                this._Unknown4 = unknown4;
+                this._Unknown5 = unknown5;
+                this._Unknown6 = unknown6;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteFloat(_Unknown1), 0, sizeof(float));
+                        ms.Write(Protocol.WriteFloat(_Unknown2), 0, sizeof(float));
+                        ms.Write(Protocol.WriteBool(_Unknown3), 0, 1);
+                        ms.Write(Protocol.WriteBool(_Unknown4), 0, 1);
+                        ms.Write(Protocol.WriteFloat(_Unknown5), 0, sizeof(float));
+                        ms.Write(Protocol.WriteFloat(_Unknown6), 0, sizeof(float));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static UNKNOWN_1B Deserialize(Stream stream)
+            {
+                float unknown1 = Protocol.ReadFloat(stream);
+                float unknown2 = Protocol.ReadFloat(stream);
+                bool unknown3 = Protocol.ReadBool(stream);
+                bool unknown4 = Protocol.ReadBool(stream);
+                float unknown5 = Protocol.ReadFloat(stream);
+                float unknown6 = Protocol.ReadFloat(stream);
+                return new UNKNOWN_1B(unknown1, unknown2, unknown3, unknown4, unknown5, unknown6);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Unknown 1: " + _Unknown1);
+                Console.WriteLine("  Unknown 2: " + _Unknown2);
+                Console.WriteLine("  Unknown 3: " + _Unknown3);
+                Console.WriteLine("  Unknown 4: " + _Unknown4);
+                Console.WriteLine("  Unknown 5: " + _Unknown5);
+                Console.WriteLine("  Unknown 6: " + _Unknown6);
+            }
+        }
         public class EntityVelocity : Packet //0x1C
         {
             private const PacketId PACKET_ID = PacketId.EntityVelocity;
@@ -1674,6 +1743,39 @@ namespace Sambuca
                 Console.WriteLine("  Entity ID: " + _EntityId);
             }
         }
+        public class Entity : Packet //0x1E
+        {
+            private const PacketId PACKET_ID = PacketId.Entity;
+
+            private int _EntityId;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public Entity(int entityid)
+            {
+                this._EntityId = entityid;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static Entity Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                return new Entity(entityid);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+            }
+        }
         public class EntityRelativeMove : Packet //0x1F
         {
             private const PacketId PACKET_ID = PacketId.EntityRelativeMove;
@@ -1721,6 +1823,50 @@ namespace Sambuca
                 Console.WriteLine("  dX: " + _dX);
                 Console.WriteLine("  dY: " + _dY);
                 Console.WriteLine("  dZ: " + _dZ);
+            }
+        }
+        public class EntityLook : Packet //0x20
+        {
+            private const PacketId PACKET_ID = PacketId.EntityLook;
+
+            private int _EntityId;
+            private sbyte _Yaw, _Pitch;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public sbyte Yaw { get { return _Yaw; } set { _Yaw = value; } }
+            public sbyte Pitch { get { return _Pitch; } set { _Pitch = value; } }
+            public EntityLook(int entityid, sbyte yaw, sbyte pitch)
+            {
+                this._EntityId = entityid;
+                this._Yaw = yaw;
+                this._Pitch = pitch;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteByte(_Yaw), 0, sizeof(sbyte));
+                        ms.Write(Protocol.WriteByte(_Pitch), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static EntityLook Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                sbyte yaw = Protocol.ReadByte(stream);
+                sbyte pitch = Protocol.ReadByte(stream);
+                return new EntityLook(entityid, yaw, pitch);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  Yaw: " + _Yaw);
+                Console.WriteLine("  Pitch: " + _Pitch);
             }
         }
         public class EntityLookAndRelativeMove : Packet //0x21
@@ -1878,6 +2024,46 @@ namespace Sambuca
             {
                 Console.WriteLine("  Entity ID: " + _EntityId);
                 Console.WriteLine("  Entity Status: " + _Status);
+                Console.WriteLine();
+            }
+        }
+        public class AttachEntity : Packet //0x27
+        {
+            private const PacketId PACKET_ID = PacketId.AttachEntity;
+
+            private int _EntityId;
+            private int _VehicleId;
+            public int EntityId { get { return _EntityId; } set { _EntityId = value; } }
+            public int VehicleId { get { return _VehicleId; } set { _VehicleId = value; } }
+            public AttachEntity(int entityid, int vehicleid)
+            {
+                this._EntityId = entityid;
+                this._VehicleId = vehicleid;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteInt(_EntityId), 0, sizeof(int));
+                        ms.Write(Protocol.WriteInt(_VehicleId), 0, sizeof(int));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static AttachEntity Deserialize(Stream stream)
+            {
+                int entityid = Protocol.ReadInt(stream);
+                int vehicleid = Protocol.ReadInt(stream);
+                return new AttachEntity(entityid, vehicleid);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  Entity ID: " + _EntityId);
+                Console.WriteLine("  Vehicle ID: " + _VehicleId);
                 Console.WriteLine();
             }
         }
@@ -2212,6 +2398,69 @@ namespace Sambuca
                 Console.WriteLine("  Pitch: " + _Pitch);
             }
         }
+        public class Explosion : Packet //0x3C
+        {
+            private const PacketId PACKET_ID = PacketId.Explosion;
+
+            private double _X, _Y, _Z;
+            private float _Unknown;
+            private int _RecordCount;
+            private sbyte[] _Records;
+            public double X { get { return _X; } set { _X = value; } }
+            public double Y { get { return _Y; } set { _Y = value; } }
+            public double Z { get { return _Z; } set { _Z = value; } }
+            public float Unknown { get { return _Unknown; } set { _Unknown = value; } }
+            public int RecordCount { get { return _RecordCount; } set { _RecordCount = value; } }
+            public sbyte[] Records { get { return _Records; } set { _Records = value; } }
+            public Explosion(double x, double y, double z, float unknown, int recordcount, sbyte[] records)
+            {
+                this._X = x;
+                this._Y = y;
+                this._Z = z;
+                this._Unknown = unknown;
+                this._RecordCount = recordcount;
+                this._Records = records;
+            }
+
+            public PacketId PacketId { get { return PACKET_ID; } }
+            public byte[] Data
+            {
+                get
+                {
+                    using(MemoryStream ms = new MemoryStream())
+                    {
+                        ms.Write(Protocol.WriteDouble(_X), 0, sizeof(double));
+                        ms.Write(Protocol.WriteDouble(_Y), 0, sizeof(double));
+                        ms.Write(Protocol.WriteDouble(_Z), 0, sizeof(double));
+                        ms.Write(Protocol.WriteFloat(_Unknown), 0, sizeof(float));
+                        ms.Write(Protocol.WriteInt(_RecordCount), 0, sizeof(int));
+                        for(int i = 0; i < _Records.Length; i++)
+                            ms.Write(Protocol.WriteByte(_Records[i]), 0, sizeof(sbyte));
+                        return ms.GetBuffer();
+                    }
+                }
+            }
+            public static Explosion Deserialize(Stream stream)
+            {
+                double x = Protocol.ReadDouble(stream);
+                double y = Protocol.ReadDouble(stream);
+                double z = Protocol.ReadDouble(stream);
+                float unknown = Protocol.ReadFloat(stream);
+                int recordcount = Protocol.ReadInt(stream);
+                sbyte[] records = new sbyte[recordcount * 3];
+                for(int i = 0; i < records.Length; i++)
+                    records[i] = Protocol.ReadByte(stream);
+                return new Explosion(x, y, z, unknown, recordcount, records);
+            }
+            public void Dump()
+            {
+                Console.WriteLine("  X: " + _X);
+                Console.WriteLine("  Y: " + _Y);
+                Console.WriteLine("  Z: " + _Z);
+                Console.WriteLine("  Unknown: " + _Unknown);
+                Console.WriteLine("  Record Count: " + _RecordCount);
+            }
+        }
         public class NewInvalidState : Packet //0x46
         {
             private const PacketId PACKET_ID = PacketId.NewInvalidState;
@@ -2438,7 +2687,7 @@ namespace Sambuca
         }
         public class IncrementStatistic : Packet //0xC8
         {
-            private const PacketId PACKET_ID = PacketId.UpdateSign;
+            private const PacketId PACKET_ID = PacketId.IncrementStatistic;
 
             private int _StatisticId;
             private sbyte _Amount;
